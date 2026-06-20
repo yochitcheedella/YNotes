@@ -2,7 +2,7 @@ import CryptoJS from 'crypto-js';
 
 // Constant salt for local key derivation.
 // In production, user-specific salts can be fetched, but a static local salt is standard for local vault setups.
-const LOCAL_SALT = 'diaro-vault-salt-PBKDF2-sha256';
+const LOCAL_SALT = 'ynote-vault-salt-PBKDF2-sha256';
 
 /**
  * Derives a strong 256-bit key from a password.

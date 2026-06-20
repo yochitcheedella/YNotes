@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-bgDark text-blue-100 font-sans min-h-screen overflow-x-hidden;
+    @apply bg-bgDark text-purple-100 font-sans min-h-screen overflow-x-hidden;
   }
 }
 

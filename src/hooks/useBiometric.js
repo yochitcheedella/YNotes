@@ -11,8 +11,8 @@ export function useBiometric() {
     if (!isNative) {
       // On web, mock status using localStorage
       setIsSupported(true);
-      const email = localStorage.getItem('diaro_remembered_email');
-      const pass = localStorage.getItem('diaro_cached_password');
+      const email = localStorage.getItem('ynote_remembered_email');
+      const pass = localStorage.getItem('ynote_cached_password');
       setIsEnrolled(!!(email && pass));
       return;
     }
@@ -23,7 +23,7 @@ export function useBiometric() {
 
       if (avail.isAvailable) {
         const saved = await NativeBiometric.isCredentialsSaved({
-          server: 'diaro.app',
+          server: 'ynote.app',
         });
         setIsEnrolled(saved.isSaved);
       } else {
@@ -42,8 +42,8 @@ export function useBiometric() {
 
   const saveCredentials = async (email, password) => {
     if (!isNative) {
-      localStorage.setItem('diaro_remembered_email', email);
-      localStorage.setItem('diaro_cached_password', password);
+      localStorage.setItem('ynote_remembered_email', email);
+      localStorage.setItem('ynote_cached_password', password);
       setIsEnrolled(true);
       return;
     }
@@ -53,7 +53,7 @@ export function useBiometric() {
       await NativeBiometric.setCredentials({
         username: email,
         password: password,
-        server: 'diaro.app',
+        server: 'ynote.app',
         accessControl: 2,
       });
       setIsEnrolled(true);
@@ -64,15 +64,15 @@ export function useBiometric() {
 
   const deleteCredentials = async () => {
     if (!isNative) {
-      localStorage.removeItem('diaro_remembered_email');
-      localStorage.removeItem('diaro_cached_password');
+      localStorage.removeItem('ynote_remembered_email');
+      localStorage.removeItem('ynote_cached_password');
       setIsEnrolled(false);
       return;
     }
 
     try {
       await NativeBiometric.deleteCredentials({
-        server: 'diaro.app',
+        server: 'ynote.app',
       });
       setIsEnrolled(false);
     } catch (err) {
@@ -83,8 +83,8 @@ export function useBiometric() {
   const authenticate = async () => {
     if (!isNative) {
       // Web mock verification
-      const email = localStorage.getItem('diaro_remembered_email');
-      const pass = localStorage.getItem('diaro_cached_password');
+      const email = localStorage.getItem('ynote_remembered_email');
+      const pass = localStorage.getItem('ynote_cached_password');
       if (email && pass) {
         return { username: email, password: pass };
       }
@@ -93,11 +93,11 @@ export function useBiometric() {
 
     try {
       const credentials = await NativeBiometric.getSecureCredentials({
-        server: 'diaro.app',
+        server: 'ynote.app',
         reason: 'Authenticate to decrypt local database keys',
-        title: 'Diaro Unlock',
+        title: 'YNote Unlock',
         subtitle: 'Use biometric to decrypt your vault',
-        description: 'Diaro uses end-to-end local AES-256 encryption.',
+        description: 'YNote uses end-to-end local AES-256 encryption.',
         negativeButtonText: 'Use Master Password',
       });
       return credentials; // Contains { username, password }

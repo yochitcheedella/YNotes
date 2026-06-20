@@ -178,7 +178,7 @@ export default function EntryEditor({ activeNote, vaultKey, onSaveComplete, onCa
         <div className="flex justify-between items-center">
           <button 
             onClick={onCancel}
-            className="flex items-center gap-1.5 text-blue-300/60 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 text-purple-300/60 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
             <span className="text-xs uppercase font-mono tracking-wider">Vault</span>
@@ -203,9 +203,9 @@ export default function EntryEditor({ activeNote, vaultKey, onSaveComplete, onCa
 
         {/* Title Input */}
         <div className="space-y-2">
-          <label className="block text-xs font-mono text-cyberBlue-300 uppercase tracking-widest" htmlFor="note-title">Title</label>
+          <label className="block text-xs font-mono text-ynoteAccent-300 uppercase tracking-widest" htmlFor="note-title">Title</label>
           <input 
-            className="w-full px-4 py-3 rounded-xl text-white font-sans placeholder:text-blue-200/20 cyber-input outline-none focus:ring-0 text-sm" 
+            className="w-full px-4 py-3 rounded-xl text-white font-sans placeholder:text-purple-200/20 cyber-input outline-none focus:ring-0 text-sm" 
             id="note-title"
             placeholder="Name your reflection..." 
             value={title}
@@ -215,7 +215,7 @@ export default function EntryEditor({ activeNote, vaultKey, onSaveComplete, onCa
 
         {/* Mood Selection */}
         <div className="space-y-2">
-          <label className="block text-xs font-mono text-cyberBlue-300 uppercase tracking-widest">Select Mood</label>
+          <label className="block text-xs font-mono text-ynoteAccent-300 uppercase tracking-widest">Select Mood</label>
           <div className="flex flex-wrap gap-2">
             {MOODS.map((m) => {
               const isSelected = mood === m.val;
@@ -226,8 +226,8 @@ export default function EntryEditor({ activeNote, vaultKey, onSaveComplete, onCa
                   onClick={() => setMood(m.val)}
                   className={`px-3 py-2 rounded-xl text-xs font-mono border transition-all duration-200
                     ${isSelected 
-                      ? 'bg-cyberBlue-600/35 border-cyberBlue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.2)]' 
-                      : 'bg-[#0f172a]/60 border-blue-400/10 text-blue-300/50 hover:text-white'
+                      ? 'bg-ynoteAccent-600/35 border-ynoteAccent-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.2)]' 
+                      : 'bg-[#0f172a]/60 border-purple-400/10 text-purple-300/50 hover:text-white'
                     }
                   `}
                 >
@@ -241,14 +241,14 @@ export default function EntryEditor({ activeNote, vaultKey, onSaveComplete, onCa
         {/* Content Box */}
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <label className="block text-xs font-mono text-cyberBlue-300 uppercase tracking-widest" htmlFor="note-content">Diary Content</label>
+            <label className="block text-xs font-mono text-ynoteAccent-300 uppercase tracking-widest" htmlFor="note-content">Diary Content</label>
             <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest flex items-center gap-1">
               <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
               AI Mood Scanner Active
             </span>
           </div>
           <textarea 
-            className="w-full px-4 py-3 rounded-xl text-white font-sans placeholder:text-blue-200/20 cyber-input outline-none focus:ring-0 text-sm min-h-[220px]" 
+            className="w-full px-4 py-3 rounded-xl text-white font-sans placeholder:text-purple-200/20 cyber-input outline-none focus:ring-0 text-sm min-h-[220px]" 
             id="note-content"
             placeholder="Write down your thoughts. They are encrypted locally in your browser..." 
             value={content}
@@ -289,12 +289,12 @@ export default function EntryEditor({ activeNote, vaultKey, onSaveComplete, onCa
         </div>
 
         {/* Offline Audio Recorder Widget Mockup */}
-        <div className="p-4 rounded-xl border border-blue-500/10 bg-slate-950/40 flex items-center justify-between">
+        <div className="p-4 rounded-xl border border-purple-500/10 bg-slate-950/40 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-cyberBlue-400 text-[28px]">mic</span>
+            <span className="material-symbols-outlined text-ynoteAccent-400 text-[28px]">mic</span>
             <div>
               <p className="text-xs text-white font-semibold">AI Voice Diary transcriber</p>
-              <p className="text-[10px] text-blue-300/40 font-mono">Record thoughts, appends transcript automatically.</p>
+              <p className="text-[10px] text-purple-300/40 font-mono">Record thoughts, appends transcript automatically.</p>
             </div>
           </div>
           <button 
@@ -303,7 +303,7 @@ export default function EntryEditor({ activeNote, vaultKey, onSaveComplete, onCa
             className={`px-4 py-2 text-xs font-mono uppercase tracking-wider rounded-lg border transition-all duration-200 flex items-center gap-1.5
               ${isRecording 
                 ? 'bg-red-950/30 border-red-500/40 text-red-400 animate-pulse' 
-                : 'bg-cyberBlue-950/40 border-cyberBlue-500/25 text-cyberBlue-400 hover:bg-cyberBlue-900/40'
+                : 'bg-ynoteAccent-950/40 border-ynoteAccent-500/25 text-ynoteAccent-400 hover:bg-ynoteAccent-900/40'
               }
             `}
           >
@@ -318,7 +318,7 @@ export default function EntryEditor({ activeNote, vaultKey, onSaveComplete, onCa
         <button 
           disabled={isSaving}
           onClick={handleSave}
-          className="w-full py-4 bg-cyberBlue-600 hover:bg-cyberBlue-500 text-white font-semibold text-xs uppercase tracking-[0.15em] rounded-xl hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-cyberBlue-500 disabled:opacity-50"
+          className="w-full py-4 bg-ynoteAccent-600 hover:bg-ynoteAccent-500 text-white font-semibold text-xs uppercase tracking-[0.15em] rounded-xl hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-ynoteAccent-500 disabled:opacity-50"
         >
           {isSaving ? (
             <div className="flex items-center gap-2">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from './supabaseClient';
 import { decryptText, encryptText } from './cryptoHelper';
+import { useAutoUpdate } from './hooks/useAutoUpdate';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import EntryEditor from './components/EntryEditor';
@@ -15,6 +16,9 @@ export default function App() {
   const [activeScreen, setActiveScreen] = useState('login');
   const [notes, setNotes] = useState([]);
   const [activeNote, setActiveNote] = useState(null);
+  
+  // Auto-Update hook
+  const { updateAvailable, updateInfo, executeUpdate, postponeUpdate } = useAutoUpdate();
 
   // Auto-lock tracking
   const [autoLockSeconds, setAutoLockSeconds] = useState(300); // 5 mins default
@@ -225,17 +229,17 @@ export default function App() {
       </div>
 
       {/* Top App Bar */}
-      <header className="fixed top-0 w-full z-50 bg-[#0b1326]/80 backdrop-blur-xl border-b border-blue-500/10 flex items-center justify-between px-6 h-16">
+      <header className="fixed top-0 w-full z-50 bg-[#0b1326]/80 backdrop-blur-xl border-b border-purple-500/10 flex items-center justify-between px-6 h-16">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-cyberBlue-900/60 border border-cyberBlue-500/25 flex items-center justify-center overflow-hidden">
-            <span className="material-symbols-outlined text-cyberBlue-400 text-sm">lock</span>
+          <div className="w-8 h-8 rounded-full bg-ynoteAccent-900/60 border border-ynoteAccent-500/25 flex items-center justify-center overflow-hidden">
+            <span className="material-symbols-outlined text-ynoteAccent-400 text-sm">lock</span>
           </div>
-          <h1 className="text-xl font-bold shimmer-text select-none">Diaro</h1>
+          <h1 className="text-xl font-bold shimmer-text select-none">YNote</h1>
         </div>
         <div className="flex items-center gap-2">
           <button 
             onClick={() => setActiveScreen(activeScreen === 'audit_logs' ? 'dashboard' : 'audit_logs')}
-            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors active:scale-95 text-cyberBlue-400"
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors active:scale-95 text-ynoteAccent-400"
             title="Security Audit Logs"
           >
             <span className="material-symbols-outlined">
@@ -244,7 +248,7 @@ export default function App() {
           </button>
           <button 
             onClick={() => setActiveScreen(activeScreen === 'search' ? 'dashboard' : 'search')}
-            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors active:scale-95 text-cyberBlue-400"
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors active:scale-95 text-ynoteAccent-400"
           >
             <span className="material-symbols-outlined">
               {activeScreen === 'search' ? 'close' : 'search'}
@@ -295,11 +299,11 @@ export default function App() {
       </div>
 
       {/* Bottom Nav Bar */}
-      <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center pt-2 pb-6 px-4 bg-[#0b1326]/90 backdrop-blur-xl border-t border-blue-500/10 shadow-lg">
+      <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center pt-2 pb-6 px-4 bg-[#0b1326]/90 backdrop-blur-xl border-t border-purple-500/10 shadow-lg">
         <button 
           onClick={() => setActiveScreen('dashboard')}
           className={`flex flex-col items-center justify-center rounded-full px-4 py-1 transition-all duration-200 active:scale-90
-            ${activeScreen === 'dashboard' ? 'text-cyberBlue-400 font-semibold' : 'text-blue-300/40 hover:text-white'}
+            ${activeScreen === 'dashboard' ? 'text-ynoteAccent-400 font-semibold' : 'text-purple-300/40 hover:text-white'}
           `}
         >
           <span className="material-symbols-outlined" style={{ fontVariationSettings: activeScreen === 'dashboard' ? "'FILL' 1" : "'FILL' 0" }}>dashboard</span>
@@ -309,7 +313,7 @@ export default function App() {
         <button 
           onClick={() => { setActiveNote(null); setActiveScreen('editor'); }}
           className={`flex flex-col items-center justify-center rounded-full px-4 py-1 transition-all duration-200 active:scale-90
-            ${activeScreen === 'editor' ? 'text-cyberBlue-400 font-semibold' : 'text-blue-300/40 hover:text-white'}
+            ${activeScreen === 'editor' ? 'text-ynoteAccent-400 font-semibold' : 'text-purple-300/40 hover:text-white'}
           `}
         >
           <span className="material-symbols-outlined">add_circle</span>
@@ -319,7 +323,7 @@ export default function App() {
         <button 
           onClick={() => setActiveScreen('media')}
           className={`flex flex-col items-center justify-center rounded-full px-4 py-1 transition-all duration-200 active:scale-90
-            ${activeScreen === 'media' ? 'text-cyberBlue-400 font-semibold' : 'text-blue-300/40 hover:text-white'}
+            ${activeScreen === 'media' ? 'text-ynoteAccent-400 font-semibold' : 'text-purple-300/40 hover:text-white'}
           `}
         >
           <span className="material-symbols-outlined" style={{ fontVariationSettings: activeScreen === 'media' ? "'FILL' 1" : "'FILL' 0" }}>perm_media</span>
@@ -329,7 +333,7 @@ export default function App() {
         <button 
           onClick={() => setActiveScreen('analytics')}
           className={`flex flex-col items-center justify-center rounded-full px-4 py-1 transition-all duration-200 active:scale-90
-            ${activeScreen === 'analytics' ? 'text-cyberBlue-400 font-semibold' : 'text-blue-300/40 hover:text-white'}
+            ${activeScreen === 'analytics' ? 'text-ynoteAccent-400 font-semibold' : 'text-purple-300/40 hover:text-white'}
           `}
         >
           <span className="material-symbols-outlined">analytics</span>
@@ -339,13 +343,39 @@ export default function App() {
         <button 
           onClick={() => setActiveScreen('settings')}
           className={`flex flex-col items-center justify-center rounded-full px-4 py-1 transition-all duration-200 active:scale-90
-            ${activeScreen === 'settings' ? 'text-cyberBlue-400 font-semibold' : 'text-blue-300/40 hover:text-white'}
+            ${activeScreen === 'settings' ? 'text-ynoteAccent-400 font-semibold' : 'text-purple-300/40 hover:text-white'}
           `}
         >
           <span className="material-symbols-outlined">settings</span>
           <span className="text-[10px] font-mono mt-0.5">Config</span>
         </button>
       </nav>
+
+      {/* Auto-Update Modal Overlay */}
+      {updateAvailable && updateInfo && (
+        <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="glass-card rounded-3xl p-6 w-full max-w-md space-y-4 text-center border border-ynoteAccent-500/30 shadow-2xl relative overflow-hidden animate-fade-in">
+            <div className="w-16 h-16 rounded-full bg-ynoteAccent-900/60 mx-auto flex items-center justify-center mb-2 border border-ynoteAccent-500/30">
+              <span className="material-symbols-outlined text-[32px] text-ynoteAccent-400">system_update</span>
+            </div>
+            <h3 className="text-xl font-bold text-white tracking-wide">Update Available</h3>
+            <p className="text-sm text-ynoteAccent-200/80 font-mono">Version {updateInfo.version}</p>
+            
+            <div className="bg-slate-900/50 rounded-xl p-4 text-left border border-white/5 my-4">
+              <p className="text-sm text-blue-100/70 whitespace-pre-line leading-relaxed font-sans">{updateInfo.releaseNotes}</p>
+            </div>
+            
+            <div className="flex gap-3 pt-2">
+              <button onClick={postponeUpdate} className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold uppercase tracking-wider rounded-xl transition-colors">
+                Later
+              </button>
+              <button onClick={executeUpdate} className="flex-1 py-3 bg-ynoteAccent-600 hover:bg-ynoteAccent-500 text-white text-xs font-semibold uppercase tracking-wider rounded-xl transition-all hover:shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+                Install Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
