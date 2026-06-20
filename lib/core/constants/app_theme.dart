@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Dark Theme Palette (Primary Premium Dark)
-  static const Color darkBackground = Color(0xFF0F172A); // Deep Slate Blue
-  static const Color darkSurface = Color(0xFF1E293B);    // Slate Blue Surface
-  static const Color darkPrimary = Color(0xFF8B5CF6);    // Vibrant Violet
-  static const Color darkSecondary = Color(0xFF10B981);  // Emerald Green
-  static const Color darkAccent = Color(0xFFF43F5E);     // Rose Red
-  static const Color darkTextPrimary = Color(0xFFF8FAFC); // Off-White
-  static const Color darkTextSecondary = Color(0xFF94A3B8); // Muted Blue-Gray
+  // Dark Theme Palette (Luxury Black & Copper Bronze)
+  static const Color darkBackground = Color(0xFF000000); // Black
+  static const Color darkSurface = Color(0xFF050505);    // Surface Black
+  static const Color darkCard = Color(0xFF0A0A0A);       // Card Black
+  static const Color darkPrimary = Color(0xFFB87333);    // Copper Bronze
+  static const Color darkSecondary = Color(0xFFA3A3A3);  // Secondary
+  static const Color darkHover = Color(0xFFCD7F32);      // Hover
+  static const Color darkTextPrimary = Color(0xFFFFFFFF); // Text
+  static const Color darkTextSecondary = Color(0xFFA3A3A3); // Secondary Text
   
   // Light Theme Palette
   static const Color lightBackground = Color(0xFFF8FAFC);
@@ -48,7 +49,7 @@ class AppTheme {
         primary: AppColors.darkPrimary,
         secondary: AppColors.darkSecondary,
         surface: AppColors.darkSurface,
-        error: AppColors.darkAccent,
+        error: Colors.redAccent,
       ),
       textTheme: const TextTheme(
         headlineLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: AppColors.darkTextPrimary, letterSpacing: -0.5),
@@ -58,11 +59,11 @@ class AppTheme {
         bodyMedium: TextStyle(fontSize: 14, color: AppColors.darkTextSecondary),
       ),
       cardTheme: CardTheme(
-        color: AppColors.darkSurface.withAlpha(204), // 0.8 opacity
+        color: AppColors.darkCard,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: Colors.white.withAlpha(25), width: 1), // subtle border
+          side: BorderSide(color: AppColors.darkPrimary.withAlpha(50), width: 1), // subtle bronze border
         ),
       ),
       appBarTheme: const AppBarTheme(
