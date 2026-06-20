@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ynote/core/utils/input_validator.dart';
+import 'package:diaro/core/utils/input_validator.dart';
 
 void main() {
   group('InputValidator Tests', () {

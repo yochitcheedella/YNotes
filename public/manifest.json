@@ -1,7 +1,7 @@
 {
-  "name": "YNotes - Your Private Notes",
-  "short_name": "YNotes",
-  "description": "Your Notes. Your Privacy. Encrypted notes app.",
+  "name": "Diaro - Your Private Notes",
+  "short_name": "Diaro",
+  "description": "Your Thoughts. Your Privacy. Encrypted notes app.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0f1e",

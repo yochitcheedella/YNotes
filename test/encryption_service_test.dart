@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:encrypt/encrypt.dart' as enc;
-import 'package:ynote/core/security/encryption_service.dart';
+import 'package:diaro/core/security/encryption_service.dart';
 
 void main() {
   group('EncryptionService Tests', () {
@@ -73,7 +73,7 @@ void main() {
       final keyBytes = sha256.convert(utf8.encode(password)).bytes;
       final key = enc.Key(Uint8List.fromList(keyBytes));
       
-      final legacyIVBytes = sha256.convert(utf8.encode(password + 'YNote_Salt_Vector')).bytes.sublist(0, 16);
+      final legacyIVBytes = sha256.convert(utf8.encode(password + 'Diaro_Salt_Vector')).bytes.sublist(0, 16);
       final iv = enc.IV(Uint8List.fromList(legacyIVBytes));
       
       final encrypter = enc.Encrypter(enc.AES(key, mode: enc.AESMode.cbc));

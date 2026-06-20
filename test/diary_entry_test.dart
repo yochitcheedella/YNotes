@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ynote/data/models/diary_entry.dart';
-import 'package:ynote/data/models/attachment.dart';
+import 'package:diaro/data/models/diary_entry.dart';
+import 'package:diaro/data/models/attachment.dart';
 
 void main() {
   group('DiaryEntry and Attachment Model Tests', () {

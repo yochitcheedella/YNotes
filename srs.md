@@ -1,6 +1,6 @@
 # SOFTWARE REQUIREMENT SPECIFICATION (SRS)
 
-# YNote – Secure Personal Diary and Journal Application with Biometric Authentication
+# Diaro – Secure Personal Diary and Journal Application with Biometric Authentication
 
 ---
 
@@ -8,7 +8,7 @@
 
 | Item             | Details                                  |
 | ---------------- | ---------------------------------------- |
-| Project Name     | YNote                                    |
+| Project Name     | Diaro                                    |
 | Version          | 1.0                                      |
 | Document Type    | Software Requirement Specification (SRS) |
 | Prepared By      | Cheedella Bala Venkata Satya Yochit      |
@@ -22,15 +22,15 @@
 
 ## 1.1 Purpose
 
-The purpose of this Software Requirement Specification (SRS) document is to define the functional and non-functional requirements for the YNote application.
+The purpose of this Software Requirement Specification (SRS) document is to define the functional and non-functional requirements for the Diaro application.
 
-YNote is a secure personal diary and journal application that enables users to store daily memories, thoughts, experiences, and notes while ensuring privacy through password protection, biometric authentication, and encryption.
+Diaro is a privacy-first digital diary designed to help users capture thoughts, memories, and daily experiences securely. With end-to-end encryption, biometric authentication, cloud synchronization, and AI-powered insights, Diaro ensures your personal moments remain truly personal.
 
 ---
 
 ## 1.2 Scope
 
-YNote provides:
+Diaro provides:
 
 * Password-based login
 * Fingerprint authentication
@@ -64,7 +64,7 @@ The application is designed primarily for Android smartphones and tablets.
 
 ## 2.1 Product Perspective
 
-YNote is a standalone mobile application that stores diary information securely and allows users to access it using passwords and fingerprint authentication.
+Diaro is a standalone mobile application that stores diary information securely and allows users to access it using passwords and fingerprint authentication.
 
 The application consists of:
 
@@ -637,9 +637,9 @@ Example:
 
 # 10. Conclusion
 
-The YNote application provides a secure and intelligent platform for digital journaling. Through password protection, fingerprint authentication, encrypted storage, calendar-based organization, mood tracking, voice recording, and backup capabilities, the system ensures that users can safely preserve their personal memories and experiences while maintaining complete privacy.
+The Diaro application provides a secure and intelligent platform for digital journaling. Through password protection, fingerprint authentication, encrypted storage, calendar-based organization, mood tracking, voice recording, and backup capabilities, the system ensures that users can safely preserve their personal memories and experiences while maintaining complete privacy.
 
-**Project Name:** YNote
+**Project Name:** Diaro
 **Application Type:** Secure Personal Diary & Journal App
 **Platform:** Android
 **Technology:** Flutter + Firebase + SQLite + AES Encryption + Biometric Authentication

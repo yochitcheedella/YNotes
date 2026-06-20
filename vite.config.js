@@ -13,9 +13,9 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}']
       },
       manifest: {
-        name: 'YNotes - Your Private Notes',
-        short_name: 'YNotes',
-        description: 'Your Notes. Your Privacy. Encrypted notes app.',
+        name: 'Diaro - Your Private Notes',
+        short_name: 'Diaro',
+        description: 'Your Thoughts. Your Privacy. Encrypted notes app.',
         theme_color: '#3b82f6',
         background_color: '#0a0f1e',
         display: 'standalone',

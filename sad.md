@@ -1,6 +1,6 @@
 # SYSTEM ANALYSIS AND DESIGN (SAD)
 
-# YNote – Secure Personal Diary and Journal Application with Biometric Authentication
+# Diaro – Secure Personal Diary and Journal Application with Biometric Authentication
 
 ---
 
@@ -8,7 +8,7 @@
 
 | Item          | Details                              |
 | ------------- | ------------------------------------ |
-| Project Name  | YNote                                |
+| Project Name  | Diaro                                |
 | Document Type | System Analysis and Design (SAD)     |
 | Version       | 1.0                                  |
 | Prepared By   | Cheedella Bala Venkata Satya Yochit  |
@@ -22,9 +22,9 @@
 
 ## 1.1 Purpose
 
-The purpose of this System Analysis and Design (SAD) document is to describe the analysis, architecture, database structure, modules, workflows, and design specifications of the YNote application.
+The purpose of this System Analysis and Design (SAD) document is to describe the analysis, architecture, database structure, modules, workflows, and design specifications of the Diaro application.
 
-YNote is a secure personal diary and journaling platform that allows users to store memories, thoughts, goals, and daily experiences with strong security through password protection, fingerprint authentication, and encrypted storage.
+Diaro is a privacy-first digital diary designed to help users capture thoughts, memories, and daily experiences securely. With end-to-end encryption, biometric authentication, cloud synchronization, and AI-powered insights, Diaro ensures your personal moments remain truly personal.
 
 ---
 
@@ -53,7 +53,7 @@ Current diary solutions include:
 
 ## Proposed System
 
-YNote introduces:
+Diaro introduces:
 
 ### Security
 
@@ -350,7 +350,7 @@ Protect data from loss.
      |
      v
 +------------+
-|   YNote    |
+|   Diaro    |
 +------+-----+
        |
        v
@@ -718,4 +718,4 @@ Example:
 
 # 17. Conclusion
 
-YNote is a highly secure and user-friendly personal diary application designed to provide complete privacy through password protection, fingerprint authentication, and encryption. The system organizes memories by date, month, and year while supporting mood tracking, voice journals, media attachments, and backup facilities. Its modular architecture, strong security model, and scalable design make it suitable as a **Final Year B.Tech Project, Startup MVP, and production-ready mobile application.**
+Diaro is a highly secure and user-friendly personal diary application designed to provide complete privacy through password protection, fingerprint authentication, and encryption. The system organizes memories by date, month, and year while supporting mood tracking, voice journals, media attachments, and backup facilities. Its modular architecture, strong security model, and scalable design make it suitable as a **Final Year B.Tech Project, Startup MVP, and production-ready mobile application.**

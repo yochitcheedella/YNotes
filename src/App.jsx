@@ -229,7 +229,7 @@ export default function App() {
           <div className="w-8 h-8 rounded-full bg-cyberBlue-900/60 border border-cyberBlue-500/25 flex items-center justify-center overflow-hidden">
             <span className="material-symbols-outlined text-cyberBlue-400 text-sm">lock</span>
           </div>
-          <h1 className="text-xl font-bold shimmer-text select-none">YNote</h1>
+          <h1 className="text-xl font-bold shimmer-text select-none">Diaro</h1>
         </div>
         <button 
           onClick={() => setActiveScreen(activeScreen === 'search' ? 'dashboard' : 'search')}

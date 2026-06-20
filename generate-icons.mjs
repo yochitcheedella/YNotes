@@ -2,7 +2,7 @@
 import sharp from 'sharp';
 import { mkdirSync } from 'fs';
 
-const SOURCE = 'C:/Users/yochi/.gemini/antigravity-ide/brain/6fb83060-32de-4ab3-8b8e-eb8511d3ba27/ynotes_app_icon_1781954347989.png';
+const SOURCE = 'C:/Users/yochi/.gemini/antigravity-ide/brain/8e9acdfc-0479-41a8-95fc-d2a3ed2aee08/media__1781971263231.png';
 const OUTPUT_DIR = './public/icons';
 
 const sizes = [72, 96, 128, 144, 152, 192, 384, 512];

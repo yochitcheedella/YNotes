@@ -1,4 +1,4 @@
--- YNotes Database Schema
+-- Diaro Database Schema
 -- Run this in Supabase SQL Editor
 
 -- Enable UUID extension
@@ -130,4 +130,4 @@ CREATE TRIGGER notes_updated_at
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
 -- Done!
-SELECT 'YNotes database schema created successfully! 🎉' AS status;
+SELECT 'Diaro database schema created successfully! 🎉' AS status;

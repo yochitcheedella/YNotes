@@ -75,7 +75,7 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
 
   // Pre-load credentials if rememberMe was active
   useEffect(() => {
-    const rememberedUser = localStorage.getItem('ynote_remembered_email');
+    const rememberedUser = localStorage.getItem('diaro_remembered_email');
     if (rememberedUser) {
       setEmailOrUsername(rememberedUser);
       setRememberMe(true);
@@ -115,7 +115,7 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
       // 1. Resolve email address if username was entered
       let loginEmail = emailOrUsername.trim();
       if (!loginEmail.includes('@')) {
-        loginEmail = `${loginEmail.toLowerCase()}@ynote.io`;
+        loginEmail = `${loginEmail.toLowerCase()}@diaro.io`;
       }
 
       // 2. Authenticate with Supabase Auth
@@ -144,14 +144,14 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
 
       // 3. Cache master password in LocalStorage and Keystore/Keychain if rememberMe is enabled
       if (rememberMe) {
-        localStorage.setItem('ynote_remembered_email', emailOrUsername);
+        localStorage.setItem('diaro_remembered_email', emailOrUsername);
         if (!Capacitor.isNativePlatform()) {
-          localStorage.setItem('ynote_cached_password', password);
+          localStorage.setItem('diaro_cached_password', password);
         }
         await saveCredentials(loginEmail, password);
       } else {
-        localStorage.removeItem('ynote_remembered_email');
-        localStorage.removeItem('ynote_cached_password');
+        localStorage.removeItem('diaro_remembered_email');
+        localStorage.removeItem('diaro_cached_password');
         await deleteCredentials();
       }
 
@@ -271,7 +271,7 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
 
         setTimeout(async () => {
           setShowBiometric(false);
-          let loginEmail = creds.username.includes('@') ? creds.username : `${creds.username.toLowerCase()}@ynote.io`;
+          let loginEmail = creds.username.includes('@') ? creds.username : `${creds.username.toLowerCase()}@diaro.io`;
           
           const { data, error } = await supabase.auth.signInWithPassword({
             email: loginEmail,
@@ -340,16 +340,16 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
       {/* Main Workspace Container */}
       <main className="relative z-10 w-full max-w-[480px] mx-auto px-4 my-auto">
         
-        {/* YNote Header Branding */}
+        {/* Diaro Header Branding */}
         <header className="text-center mb-8 flex flex-col items-center">
           <div className="w-16 h-16 rounded-2xl bg-cyberBlue-950/60 border border-cyberBlue-500/25 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(59,130,246,0.15)]">
             <span className="material-symbols-outlined text-[36px] text-cyberBlue-400 font-light" style={{ fontVariationSettings: "'FILL' 0" }}>lock</span>
           </div>
           <h1 className="text-4xl font-bold tracking-tight text-white mb-2 select-none">
-            <span className="shimmer-text">YNote</span>
+            <span className="shimmer-text">Diaro</span>
           </h1>
           <p className="text-sm font-mono text-cyberBlue-400 uppercase tracking-[0.25em] text-xs">
-            Your Notes. Your Privacy. 🔐
+            Your Thoughts. Your Privacy. 🔐
           </p>
         </header>
 
@@ -387,7 +387,7 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
                     <input 
                       className="w-full pl-12 pr-4 py-3.5 rounded-xl text-white font-sans placeholder:text-blue-200/20 cyber-input outline-none focus:ring-0 text-sm" 
                       id="email-or-username" 
-                      placeholder="e.g. secure@ynote.io" 
+                      placeholder="e.g. secure@diaro.io" 
                       required 
                       tabIndex="1"
                       type="text"
@@ -523,7 +523,7 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
                     <input 
                       className="w-full pl-12 pr-4 py-3 rounded-xl text-white font-sans placeholder:text-blue-200/20 cyber-input outline-none focus:ring-0 text-sm" 
                       id="reg-email" 
-                      placeholder="secure@ynote.io" 
+                      placeholder="secure@diaro.io" 
                       required 
                       type="email"
                       value={regEmail}

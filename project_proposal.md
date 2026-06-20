@@ -2,7 +2,7 @@
 
 ## Project Title
 
-# **YNote – Secure Personal Diary and Journal Application with Biometric Authentication**
+# **Diaro – Secure Personal Diary and Journal Application with Biometric Authentication**
 
 ### Tagline
 
@@ -12,9 +12,9 @@
 
 # 1. Abstract
 
-YNote is a secure digital diary and journaling application designed to help users record their daily thoughts, memories, experiences, goals, and personal information in a private environment. The application uses password protection, fingerprint authentication, and data encryption to ensure complete privacy.
+Diaro is a secure digital diary and journaling application designed to help users record their daily thoughts, memories, experiences, goals, and personal information in a private environment. The application uses password protection, fingerprint authentication, and data encryption to ensure complete privacy.
 
-Unlike traditional diary applications, YNote organizes entries based on dates, months, and years through an interactive calendar interface. Users can write journal entries, attach images, record voice notes, track moods, and search past memories instantly.
+Unlike traditional diary applications, Diaro organizes entries based on dates, months, and years through an interactive calendar interface. Users can write journal entries, attach images, record voice notes, track moods, and search past memories instantly.
 
 The application aims to provide a safe digital space where users can preserve their personal experiences while maintaining complete control over their data.
 
@@ -37,7 +37,7 @@ Users require a secure digital diary system that provides both privacy and ease 
 
 # 3. Proposed Solution
 
-YNote provides:
+Diaro provides:
 
 * Password-based authentication
 * Fingerprint authentication
@@ -409,7 +409,7 @@ Firebase Storage
 
 # 12. Expected Outcomes
 
-After completion, YNote will:
+After completion, Diaro will:
 
 * Securely store diary entries.
 * Protect data using biometrics.

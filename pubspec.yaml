@@ -1,5 +1,5 @@
-name: ynote
-description: "YNote - Secure Personal Diary and Journal Application"
+name: diaro
+description: "Diaro is a privacy-first digital diary designed to help users capture thoughts, memories, and daily experiences securely."
 publish_to: 'none'
 
 version: 1.0.0+2

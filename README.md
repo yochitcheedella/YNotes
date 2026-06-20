@@ -1,4 +1,4 @@
-# 🔐 YNotes — Your Notes. Your Privacy.
+# 🔐 Diaro — Your Thoughts. Your Privacy.
 
 A premium, encrypted personal notes web app built with React + Vite and Supabase.
 
@@ -54,7 +54,7 @@ VITE_SUPABASE_ANON_KEY=your-anon-key-here
 ## 🏗️ Project Structure
 
 ```
-YNotes/
+Diaro/
 ├── src/
 │   ├── components/
 │   │   ├── Login.jsx          # Auth screen
@@ -82,4 +82,4 @@ YNotes/
 
 ## 📄 License
 
-MIT License — © 2026 YNotes
+MIT License — © 2026 Diaro

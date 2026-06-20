@@ -1,6 +1,6 @@
 # PROJECT DESIGN REPORT (PDR)
 
-# YNote – Secure Personal Diary and Journal Application with Biometric Authentication
+# Diaro – Secure Personal Diary and Journal Application with Biometric Authentication
 
 ---
 
@@ -8,7 +8,7 @@
 
 ### Project Title
 
-**YNote – Secure Personal Diary and Journal Application with Biometric Authentication**
+**Diaro – Secure Personal Diary and Journal Application with Biometric Authentication**
 
 ### Project Domain
 
@@ -28,7 +28,7 @@ Agile Development Model
 
 # 2. Project Overview
 
-YNote is a secure diary and journaling application that allows users to record daily thoughts, memories, experiences, goals, and personal notes in an encrypted environment.
+Diaro is a secure diary and journaling application that allows users to record daily thoughts, memories, experiences, goals, and personal notes in an encrypted environment.
 
 The application uses password authentication and fingerprint verification to prevent unauthorized access. All diary entries are organized date-wise and month-wise through an interactive calendar interface.
 
@@ -66,7 +66,7 @@ Traditional diary applications face several limitations:
 
 # 5. Proposed System
 
-The proposed YNote system introduces:
+The proposed Diaro system introduces:
 
 ### Security Features
 
@@ -278,7 +278,7 @@ User
  |
  |
  v
-YNote System
+Diaro System
  |
  |
  v
@@ -301,7 +301,7 @@ User
  +---- Backup Data
  |
  v
-YNote Application
+Diaro Application
  |
  +---- Authentication
  +---- Diary Module
@@ -555,4 +555,4 @@ Example:
 
 # 20. Conclusion
 
-YNote is a secure and intelligent digital diary platform that combines strong security mechanisms with an easy-to-use journaling experience. By integrating password protection, fingerprint authentication, encrypted storage, calendar-based organization, and multimedia support, YNote provides a modern solution for secure personal diary management and serves as an excellent **B.Tech Final Year Project and Startup MVP.**
+Diaro is a secure and intelligent digital diary platform that combines strong security mechanisms with an easy-to-use journaling experience. By integrating password protection, fingerprint authentication, encrypted storage, calendar-based organization, and multimedia support, Diaro provides a modern solution for secure personal diary management and serves as an excellent **B.Tech Final Year Project and Startup MVP.**

@@ -32,13 +32,13 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => DiaryProvider()),
       ],
-      child: const YNoteApp(),
+      child: const DiaroApp(),
     ),
   );
 }
 
-class YNoteApp extends StatelessWidget {
-  const YNoteApp({super.key});
+class DiaroApp extends StatelessWidget {
+  const DiaroApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +46,7 @@ class YNoteApp extends StatelessWidget {
     final authProvider = Provider.of<AuthProvider>(context);
 
     return MaterialApp(
-      title: 'YNote',
+      title: 'Diaro',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
