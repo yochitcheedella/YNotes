@@ -1,0 +1,19 @@
+{
+  "appId": "com.ynote.app",
+  "appName": "YNote",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "launchAutoHide": true,
+      "backgroundColor": "#0a0f1e",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "backgroundColor": "#0a0f1e",
+      "style": "DARK"
+    }
+  }
+}

@@ -17,6 +17,7 @@ export default function App() {
 
   // Auto-lock tracking
   const [autoLockSeconds, setAutoLockSeconds] = useState(300); // 5 mins default
+  const [loginMessage, setLoginMessage] = useState('');
   const lastActivityRef = useRef(Date.now());
 
   // Supabase Auth state listener
@@ -164,7 +165,7 @@ export default function App() {
       const inactiveMs = Date.now() - lastActivityRef.current;
       if (inactiveMs >= autoLockSeconds * 1000) {
         handleLogout();
-        alert('Vault Auto-Locked due to session inactivity.');
+        setLoginMessage('Vault Auto-Locked due to session inactivity.');
       }
     }, 5000);
 
@@ -203,7 +204,13 @@ export default function App() {
   };
 
   if (!session) {
-    return <Login onAuthSuccess={handleAuthSuccess} />;
+    return (
+      <Login 
+        onAuthSuccess={handleAuthSuccess} 
+        initialMessage={loginMessage} 
+        clearInitialMessage={() => setLoginMessage('')} 
+      />
+    );
   }
 
   return (

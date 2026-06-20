@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">YNote</string>
+    <string name="title_activity_main">YNote</string>
+    <string name="package_name">com.ynote.app</string>
+    <string name="custom_url_scheme">com.ynote.app</string>
+</resources>

@@ -38,3 +38,12 @@ build/
 local.properties
 
 .vercel
+
+# Android release signing — NEVER commit this!
+android/app/release.keystore
+android/app/*.jks
+
+# Android build outputs
+android/app/build/
+android/.gradle/
+android/capacitor-cordova-android-plugins/build/

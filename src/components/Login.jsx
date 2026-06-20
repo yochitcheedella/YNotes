@@ -1,10 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient';
 import { deriveKey, generateRecoveryKey } from '../cryptoHelper';
+import { useBiometric } from '../hooks/useBiometric';
 
-export default function Login({ onAuthSuccess }) {
+export default function Login({ onAuthSuccess, initialMessage, clearInitialMessage }) {
   // Modes: 'login' or 'register'
   const [authMode, setAuthMode] = useState('login');
+  const { isSupported, isEnrolled, saveCredentials, deleteCredentials, authenticate } = useBiometric();
+
+  useEffect(() => {
+    if (initialMessage) {
+      showCustomAlert('Security Notification', initialMessage);
+      if (clearInitialMessage) clearInitialMessage();
+    }
+  }, [initialMessage]);
   
   // Login fields
   const [emailOrUsername, setEmailOrUsername] = useState('');
@@ -132,13 +141,15 @@ export default function Login({ onAuthSuccess }) {
         return;
       }
 
-      // 3. Cache master password in LocalStorage if rememberMe is enabled
+      // 3. Cache master password in LocalStorage and Keystore/Keychain if rememberMe is enabled
       if (rememberMe) {
         localStorage.setItem('ynote_remembered_email', emailOrUsername);
         localStorage.setItem('ynote_cached_password', password);
+        await saveCredentials(loginEmail, password);
       } else {
         localStorage.removeItem('ynote_remembered_email');
         localStorage.removeItem('ynote_cached_password');
+        await deleteCredentials();
       }
 
       // 4. Derive symmetric vault key from master password
@@ -242,29 +253,45 @@ export default function Login({ onAuthSuccess }) {
     }
   };
 
-  const triggerBiometric = () => {
+  const triggerBiometric = async () => {
     setShowBiometric(true);
     setBioStatus('scanning');
     setBioTitle('Scanning Biometric Key...');
-    setBioDesc('Hold finger on the sensor. Validating SHA-256 fingerprint signature.');
+    setBioDesc('Hold finger on the sensor. Validating secure biometric signature.');
 
-    bioTimeoutRef.current = setTimeout(() => {
-      const email = localStorage.getItem('ynote_remembered_email');
-      const pass = localStorage.getItem('ynote_cached_password');
-
-      if (email && pass) {
+    try {
+      const creds = await authenticate();
+      if (creds && creds.username && creds.password) {
         setBioStatus('success');
         setBioTitle('Access Key Verified');
         setBioDesc('Initializing secure database connections. Decrypting diaries...');
 
         setTimeout(async () => {
           setShowBiometric(false);
-          let loginEmail = email.includes('@') ? email : `${email.toLowerCase()}@ynote.io`;
-          const { data } = await supabase.auth.signInWithPassword({
+          let loginEmail = creds.username.includes('@') ? creds.username : `${creds.username.toLowerCase()}@ynote.io`;
+          
+          const { data, error } = await supabase.auth.signInWithPassword({
             email: loginEmail,
-            password: pass,
+            password: creds.password,
           });
-          const key = deriveKey(pass);
+
+          if (error) {
+            if (supabase.supabaseUrl && supabase.supabaseUrl.includes('your-project')) {
+              console.warn('Supabase using placeholder. Falling back to offline sandbox session.');
+              const derivedVaultKey = deriveKey(creds.password);
+              onAuthSuccess({
+                user: { email: loginEmail, user_metadata: { username: creds.username } },
+                vaultKey: derivedVaultKey,
+                isDecoy: false,
+              });
+              return;
+            }
+            setErrorMsg('Biometric authentication succeeded, but database sync failed.');
+            triggerShake();
+            return;
+          }
+
+          const key = deriveKey(creds.password);
           onAuthSuccess({
             user: data?.user || { email: loginEmail },
             vaultKey: key,
@@ -272,19 +299,16 @@ export default function Login({ onAuthSuccess }) {
           });
         }, 1000);
       } else {
-        setBioStatus('success');
-        setBioTitle('Access Key Verified');
-        setBioDesc('Opening secure sandbox vault (Offline Mode).');
-        setTimeout(() => {
-          setShowBiometric(false);
-          onAuthSuccess({
-            user: { email: 'sandbox@ynote.io', user_metadata: { username: 'sandbox_user' } },
-            vaultKey: deriveKey('Sandbox@123'),
-            isDecoy: false,
-          });
-        }, 1200);
+        setShowBiometric(false);
+        setBioStatus('default');
       }
-    }, 2200);
+    } catch (err) {
+      console.error(err);
+      setShowBiometric(false);
+      setBioStatus('default');
+      setErrorMsg('Biometric authentication failed.');
+      triggerShake();
+    }
   };
 
   const cancelBiometric = () => {
@@ -449,16 +473,18 @@ export default function Login({ onAuthSuccess }) {
                   </button>
 
                   {/* Biometrics Button */}
-                  <button 
-                    className="w-full py-3.5 bg-cyberBlue-950/40 hover:bg-cyberBlue-900/40 border border-cyberBlue-500/20 text-cyberBlue-400 hover:text-cyberBlue-300 font-semibold text-xs uppercase tracking-[0.15em] rounded-xl active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2.5 focus:outline-none focus:ring-2 focus:ring-cyberBlue-500" 
-                    id="biometric-btn"
-                    onClick={triggerBiometric}
-                    tabIndex="7"
-                    type="button"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">fingerprint</span>
-                    <span>Verify Biometrics</span>
-                  </button>
+                  {isEnrolled && (
+                    <button 
+                      className="w-full py-3.5 bg-cyberBlue-950/40 hover:bg-cyberBlue-900/40 border border-cyberBlue-500/20 text-cyberBlue-400 hover:text-cyberBlue-300 font-semibold text-xs uppercase tracking-[0.15em] rounded-xl active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2.5 focus:outline-none focus:ring-2 focus:ring-cyberBlue-500" 
+                      id="biometric-btn"
+                      onClick={triggerBiometric}
+                      tabIndex="7"
+                      type="button"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">fingerprint</span>
+                      <span>Verify Biometrics</span>
+                    </button>
+                  )}
                 </div>
               </form>
 
