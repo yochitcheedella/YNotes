@@ -8,6 +8,7 @@ import SearchMemories from './components/SearchMemories';
 import Analytics from './components/Analytics';
 import MediaVault from './components/MediaVault';
 import Settings from './components/Settings';
+import AuditLogs from './components/AuditLogs';
 
 export default function App() {
   const [session, setSession] = useState(null); // { user, vaultKey, isDecoy }
@@ -231,14 +232,25 @@ export default function App() {
           </div>
           <h1 className="text-xl font-bold shimmer-text select-none">Diaro</h1>
         </div>
-        <button 
-          onClick={() => setActiveScreen(activeScreen === 'search' ? 'dashboard' : 'search')}
-          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors active:scale-95 text-cyberBlue-400"
-        >
-          <span className="material-symbols-outlined">
-            {activeScreen === 'search' ? 'close' : 'search'}
-          </span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setActiveScreen(activeScreen === 'audit_logs' ? 'dashboard' : 'audit_logs')}
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors active:scale-95 text-cyberBlue-400"
+            title="Security Audit Logs"
+          >
+            <span className="material-symbols-outlined">
+              {activeScreen === 'audit_logs' ? 'close' : 'shield'}
+            </span>
+          </button>
+          <button 
+            onClick={() => setActiveScreen(activeScreen === 'search' ? 'dashboard' : 'search')}
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors active:scale-95 text-cyberBlue-400"
+          >
+            <span className="material-symbols-outlined">
+              {activeScreen === 'search' ? 'close' : 'search'}
+            </span>
+          </button>
+        </div>
       </header>
 
       {/* Main Viewport Content */}
@@ -276,6 +288,9 @@ export default function App() {
         )}
         {activeScreen === 'settings' && (
           <Settings onLogout={handleLogout} />
+        )}
+        {activeScreen === 'audit_logs' && (
+          <AuditLogs onCancel={() => setActiveScreen('dashboard')} />
         )}
       </div>
 

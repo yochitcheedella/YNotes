@@ -14,6 +14,8 @@ export default function EntryEditor({ activeNote, vaultKey, onSaveComplete, onCa
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [mood, setMood] = useState('neutral');
+  const [expiresInDays, setExpiresInDays] = useState('');
+  const [maxViews, setMaxViews] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordTimer, setRecordTimer] = useState(0);
@@ -25,10 +27,17 @@ export default function EntryEditor({ activeNote, vaultKey, onSaveComplete, onCa
       setTitle(activeNote.title || '');
       setContent(activeNote.content || '');
       setMood(activeNote.mood || 'neutral');
+      if (activeNote.expires_at) {
+        const days = Math.round((new Date(activeNote.expires_at) - new Date()) / 86400000);
+        setExpiresInDays(days > 0 ? days : '');
+      }
+      setMaxViews(activeNote.max_views || '');
     } else {
       setTitle('');
       setContent('');
       setMood('neutral');
+      setExpiresInDays('');
+      setMaxViews('');
     }
   }, [activeNote]);
 
@@ -94,6 +103,8 @@ export default function EntryEditor({ activeNote, vaultKey, onSaveComplete, onCa
             title: encryptedTitle,
             content: encryptedContent,
             mood: mood,
+            expires_at: expiresInDays ? new Date(Date.now() + parseInt(expiresInDays, 10) * 86400000).toISOString() : null,
+            max_views: maxViews ? parseInt(maxViews, 10) : null,
           })
           .eq('id', activeNote.id);
 
@@ -110,7 +121,9 @@ export default function EntryEditor({ activeNote, vaultKey, onSaveComplete, onCa
             content: encryptedContent,
             mood: mood,
             user_id: userId,
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            expires_at: expiresInDays ? new Date(Date.now() + parseInt(expiresInDays, 10) * 86400000).toISOString() : null,
+            max_views: maxViews ? parseInt(maxViews, 10) : null,
           });
 
         if (error) {
@@ -241,6 +254,38 @@ export default function EntryEditor({ activeNote, vaultKey, onSaveComplete, onCa
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
+        </div>
+
+        {/* Self-Destruct Security Settings */}
+        <div className="p-4 rounded-xl border border-orange-500/20 bg-[#0a0a0a] flex flex-col gap-3">
+          <div className="flex items-center gap-2 text-orange-400">
+            <span className="material-symbols-outlined text-[20px]">local_fire_department</span>
+            <p className="text-xs font-mono uppercase tracking-widest font-semibold">Self-Destruct Parameters</p>
+          </div>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-[10px] font-mono text-gray-400 uppercase tracking-widest mb-1">Delete after X days</label>
+              <input 
+                type="number"
+                min="1"
+                className="w-full px-3 py-2 rounded-lg text-white font-sans bg-black border border-gray-800 outline-none text-sm focus:border-orange-500/50" 
+                placeholder="Leave blank for never" 
+                value={expiresInDays}
+                onChange={(e) => setExpiresInDays(e.target.value)}
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-[10px] font-mono text-gray-400 uppercase tracking-widest mb-1">Delete after X views</label>
+              <input 
+                type="number"
+                min="1"
+                className="w-full px-3 py-2 rounded-lg text-white font-sans bg-black border border-gray-800 outline-none text-sm focus:border-orange-500/50" 
+                placeholder="Leave blank for infinite" 
+                value={maxViews}
+                onChange={(e) => setMaxViews(e.target.value)}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Offline Audio Recorder Widget Mockup */}

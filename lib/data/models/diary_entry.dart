@@ -10,6 +10,9 @@ class DiaryEntry {
   final DateTime createdAt;
   final DateTime? updatedAt; // NEW: track last modification time
   final List<Attachment> attachments;
+  final DateTime? expiresAt;
+  final int? maxViews;
+  final int viewsCount;
 
   DiaryEntry({
     this.id,
@@ -21,6 +24,9 @@ class DiaryEntry {
     required this.createdAt,
     this.updatedAt,
     this.attachments = const [],
+    this.expiresAt,
+    this.maxViews,
+    this.viewsCount = 0,
   });
 
   /// Serialize to SQLite-compatible map.
@@ -34,6 +40,9 @@ class DiaryEntry {
       'Mood': mood,
       'CreatedAt': createdAt.toIso8601String(),
       'UpdatedAt': (updatedAt ?? DateTime.now()).toIso8601String(),
+      'ExpiresAt': expiresAt?.toIso8601String(),
+      'MaxViews': maxViews,
+      'ViewsCount': viewsCount,
     };
     // Only include EntryID if it exists (prevents SQLite insertion issues)
     if (id != null) map['EntryID'] = id;
@@ -51,6 +60,9 @@ class DiaryEntry {
       createdAt: DateTime.parse(map['CreatedAt'] as String),
       updatedAt: map['UpdatedAt'] != null ? DateTime.tryParse(map['UpdatedAt'] as String) : null,
       attachments: attachments,
+      expiresAt: map['ExpiresAt'] != null ? DateTime.tryParse(map['ExpiresAt'] as String) : null,
+      maxViews: map['MaxViews'] as int?,
+      viewsCount: map['ViewsCount'] as int? ?? 0,
     );
   }
 
@@ -66,6 +78,9 @@ class DiaryEntry {
     DateTime? createdAt,
     DateTime? updatedAt,
     List<Attachment>? attachments, // FIX: was non-nullable causing compile error
+    DateTime? expiresAt,
+    int? maxViews,
+    int? viewsCount,
   }) {
     return DiaryEntry(
       id: id ?? this.id,
@@ -77,6 +92,9 @@ class DiaryEntry {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
       attachments: attachments ?? this.attachments,
+      expiresAt: expiresAt ?? this.expiresAt,
+      maxViews: maxViews ?? this.maxViews,
+      viewsCount: viewsCount ?? this.viewsCount,
     );
   }
 }

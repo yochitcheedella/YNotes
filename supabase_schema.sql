@@ -53,6 +53,11 @@ CREATE TABLE IF NOT EXISTS public.notes (
   is_locked BOOLEAN DEFAULT FALSE,
   word_count INTEGER DEFAULT 0,
   
+  -- Self-Destruct Features
+  expires_at TIMESTAMPTZ,
+  max_views INTEGER,
+  views_count INTEGER DEFAULT 0,
+  
   -- Timestamps
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
@@ -71,6 +76,20 @@ CREATE TABLE IF NOT EXISTS public.media (
   storage_path TEXT NOT NULL,
   mime_type TEXT,
   size_bytes BIGINT,
+  
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- AUDIT LOGS TABLE (Security Event Tracking)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.audit_logs (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  
+  action TEXT NOT NULL,          -- e.g., 'login', 'note_exported', 'password_changed'
+  device_info TEXT,              -- e.g., 'Chrome on Windows', 'Diaro iOS App'
+  ip_address TEXT,               -- (Optional) tracked for security alerts
   
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -105,6 +124,14 @@ CREATE POLICY "Users can insert own media" ON public.media
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can delete own media" ON public.media
   FOR DELETE USING (auth.uid() = user_id);
+
+-- Audit Logs (Immutable, append-only by users/system)
+ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view own audit logs" ON public.audit_logs
+  FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own audit logs" ON public.audit_logs
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+-- No UPDATE or DELETE policies allowed for audit_logs to ensure immutability.
 
 -- ============================================================
 -- INDEXES for performance

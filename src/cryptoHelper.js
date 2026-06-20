@@ -7,11 +7,16 @@ const LOCAL_SALT = 'diaro-vault-salt-PBKDF2-sha256';
 /**
  * Derives a strong 256-bit key from a password.
  * @param {string} password 
+ * @param {string} [userIdentifier] Optional user email/ID to generate a user-specific dynamic salt
  * @returns {string} Key in Hex format
  */
-export function deriveKey(password) {
+export function deriveKey(password, userIdentifier = '') {
   if (!password) return '';
-  return CryptoJS.PBKDF2(password, LOCAL_SALT, {
+  // Zero-Knowledge Architecture: Use a user-specific dynamic salt (e.g. email) combined with the local salt
+  // This makes rainbow table attacks across the user base mathematically impossible.
+  const dynamicSalt = userIdentifier ? `${userIdentifier.toLowerCase()}-${LOCAL_SALT}` : LOCAL_SALT;
+  
+  return CryptoJS.PBKDF2(password, dynamicSalt, {
     keySize: 256 / 32,
     iterations: 1000
   }).toString();

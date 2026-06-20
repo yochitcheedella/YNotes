@@ -74,11 +74,11 @@ Diaro/
 └── package.json
 ```
 
-## 🔐 Security
+## 🛡️ Security & Privacy
 
-- All note content is encrypted **before** being sent to Supabase
-- Your master password is **never stored** — only a derived key
-- Even Supabase admins cannot read your notes
+Diaro follows enterprise-grade security and privacy measures, including AES-256 End-to-End Encryption, Zero-Knowledge Architecture, and Self-Destruct Notes. 
+
+For a complete overview of our data protection, biometrics, and authentication practices, please read our comprehensive [Data Security Measures](SECURITY.md) document.
 
 ## 📄 License
 
