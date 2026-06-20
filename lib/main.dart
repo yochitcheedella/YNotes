@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'core/services/firebase_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/constants/app_theme.dart';
 import 'core/security/auto_lock_service.dart';
 import 'presentation/providers/auth_provider.dart';
@@ -18,11 +17,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    await Firebase.initializeApp();
-    FirebaseService.instance.markInitialized();
-    AppLogger.info("Firebase successfully initialized.");
+    await Supabase.initialize(
+      url: 'https://ojzctwtvocuabudmvqlt.supabase.co',
+      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qemN0d3R2b2N1YWJ1ZG12cWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NDIxNTIsImV4cCI6MjA5NzUxODE1Mn0.PhmF27J31XwyIvgRJJgbE4ZMop8EceDVRS195g-tuTw',
+      authOptions: const FlutterAuthClientOptions(
+        autoRefreshToken: true,
+      ),
+    );
+    AppLogger.info("Supabase successfully initialized.");
   } catch (e) {
-    AppLogger.warning("Firebase initialization failed: $e. Running in offline/secure local storage mode.");
+    AppLogger.warning("Supabase initialization failed: $e. Running in offline/secure local storage mode.");
   }
 
   runApp(
@@ -37,13 +41,39 @@ void main() async {
   );
 }
 
-class DiaroApp extends StatelessWidget {
+class DiaroApp extends StatefulWidget {
   const DiaroApp({super.key});
+
+  @override
+  State<DiaroApp> createState() => _DiaroAppState();
+}
+
+class _DiaroAppState extends State<DiaroApp> {
+  
+  @override
+  void initState() {
+    super.initState();
+    _setupSupabaseAuth();
+  }
+
+  void _setupSupabaseAuth() {
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      final event = data.event;
+      final session = data.session;
+
+      if (session != null) {
+        AppLogger.info("Supabase session restored: \${session.user.id}");
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    final authProvider = Provider.of<AuthProvider>(context);
+    
+    // Check session on startup
+    final session = Supabase.instance.client.auth.currentSession;
+    final initialRoute = session != null ? '/dashboard' : '/login';
 
     return MaterialApp(
       title: 'Diaro',
@@ -52,14 +82,13 @@ class DiaroApp extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: themeProvider.themeMode,
       
-      // Global builder to wrap the entire app in pointer interaction listeners & lifecycle observers
       builder: (context, child) {
         return AppInteractionAndLifecycleWrapper(
           child: child ?? const SizedBox(),
         );
       },
       
-      initialRoute: '/',
+      initialRoute: initialRoute,
       routes: {
         '/': (context) => const SplashScreen(),
         '/onboarding': (context) => const OnboardingScreen(),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../data/database/db_helper.dart';
+import '../../core/utils/app_logger.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/models/diary_entry.dart';
 import '../../data/models/attachment.dart';
-import '../../core/utils/app_logger.dart';
 
 class DiaryProvider with ChangeNotifier {
   List<DiaryEntry> _entries = [];
@@ -38,13 +38,38 @@ class DiaryProvider with ChangeNotifier {
     }).toList();
   }
 
-  // Load all entries from active database
+  // Load all entries from Supabase database
   Future<void> loadEntries() async {
     _isLoading = true;
     notifyListeners();
+    
+    final supabase = Supabase.instance.client;
+    print("Current User: \${supabase.auth.currentUser?.id}");
+    print("Current Session: \${supabase.auth.currentSession}");
+    print("Loading Entries...");
 
     try {
-      _entries = await DBHelper.instance.getAllEntries();
+      if (supabase.auth.currentUser != null) {
+        final data = await supabase
+            .from('journal_entries')
+            .select()
+            .eq('user_id', supabase.auth.currentUser!.id)
+            .order('created_at');
+            
+        print("Loaded Entries Count: \${data.length}");
+        
+        // Map data to diary entries (simplified for this migration)
+        _entries = data.map((json) => DiaryEntry(
+          title: json['title'] ?? '',
+          content: json['content'] ?? '',
+          mood: 'neutral', // default
+          entryDate: DateTime.parse(json['created_at']),
+          createdAt: DateTime.parse(json['created_at']),
+          attachments: [],
+        )).toList();
+      } else {
+         _entries = [];
+      }
     } catch (e) {
       AppLogger.error("Error loading entries: $e", exception: e);
       _entries = [];
@@ -62,28 +87,31 @@ class DiaryProvider with ChangeNotifier {
     required DateTime entryDate,
     required List<Attachment> attachments,
   }) async {
-    final entry = DiaryEntry(
-      title: title,
-      content: content,
-      mood: mood,
-      entryDate: entryDate,
-      createdAt: DateTime.now(),
-      attachments: attachments,
-    );
-
-    await DBHelper.instance.insertEntry(entry);
-    await loadEntries();
+    final supabase = Supabase.instance.client;
+    print("Saving Entry...");
+    
+    if (supabase.auth.currentUser != null) {
+      await supabase
+          .from('journal_entries')
+          .insert({
+            'user_id': supabase.auth.currentUser!.id,
+            'title': title,
+            'content': content,
+          });
+      print("Entry Saved Successfully");
+      await loadEntries();
+    }
   }
 
   // Update existing diary entry
   Future<void> updateEntry(DiaryEntry entry) async {
-    await DBHelper.instance.updateEntry(entry);
+    // Left unimplemented for migration phase 1
     await loadEntries();
   }
 
   // Delete diary entry
   Future<void> deleteEntry(int id) async {
-    await DBHelper.instance.deleteEntry(id);
+    // Left unimplemented for migration phase 1
     await loadEntries();
   }
 

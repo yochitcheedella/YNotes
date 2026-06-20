@@ -1,0 +1,131 @@
+:root {
+    --bg-dark: #0a0a0c;
+    --copper-primary: #cd7f32;
+    --copper-light: #e69d54;
+    --text-main: #f5f5f5;
+    --text-muted: #a0a0a5;
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(205, 127, 50, 0.2);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+    background-image: 
+        radial-gradient(circle at 15% 50%, rgba(205, 127, 50, 0.08), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(205, 127, 50, 0.05), transparent 25%);
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.logo {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+}
+
+.logo-y {
+    color: var(--copper-primary);
+    font-size: 2.5rem;
+}
+
+h1 {
+    font-size: clamp(3rem, 8vw, 5rem);
+    line-height: 1.1;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(180deg, #fff 0%, #a0a0a5 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -2px;
+}
+
+p {
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto 3rem auto;
+    line-height: 1.6;
+}
+
+.download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, var(--copper-primary), #a66324);
+    color: white;
+    text-decoration: none;
+    padding: 1.25rem 2.5rem;
+    border-radius: 100px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 30px rgba(205, 127, 50, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 40px rgba(205, 127, 50, 0.3);
+    background: linear-gradient(135deg, var(--copper-light), var(--copper-primary));
+}
+
+.features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 4rem;
+}
+
+.feature-tag {
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    padding: 0.75rem 1.5rem;
+    border-radius: 100px;
+    font-size: 0.875rem;
+    color: var(--copper-light);
+    backdrop-filter: blur(10px);
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 1.5rem;
+    }
+    
+    .features {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .download-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

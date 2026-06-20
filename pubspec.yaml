@@ -24,11 +24,8 @@ dependencies:
   crypto: ^3.0.3
   local_auth: ^2.2.0
 
-  # Firebase Integration
-  firebase_core: ^3.1.1
-  firebase_auth: ^5.1.1
-  cloud_firestore: ^5.0.1
-  firebase_storage: ^12.0.1
+  # Supabase Integration
+  supabase_flutter: ^2.5.1
 
   # Utilities, Preferences and Date Parsing
   intl: ^0.19.0

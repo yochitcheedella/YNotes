@@ -1,6 +1,6 @@
 {
   "appId": "com.ynote.app",
-  "appName": "YNote",
+  "appName": "Diaro",
   "webDir": "dist",
   "plugins": {
     "SplashScreen": {
