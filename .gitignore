@@ -47,6 +47,3 @@ android/app/*.jks
 android/app/build/
 android/.gradle/
 android/capacitor-cordova-android-plugins/build/
-
-# Temporary public APK downloads
-public/*.apk
