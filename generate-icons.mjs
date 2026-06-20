@@ -1,0 +1,20 @@
+// generate-icons.mjs - Generate PWA icons from source image
+import sharp from 'sharp';
+import { mkdirSync } from 'fs';
+
+const SOURCE = 'C:/Users/yochi/.gemini/antigravity-ide/brain/6fb83060-32de-4ab3-8b8e-eb8511d3ba27/ynotes_app_icon_1781954347989.png';
+const OUTPUT_DIR = './public/icons';
+
+const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+
+mkdirSync(OUTPUT_DIR, { recursive: true });
+
+for (const size of sizes) {
+  await sharp(SOURCE)
+    .resize(size, size)
+    .png()
+    .toFile(`${OUTPUT_DIR}/icon-${size}.png`);
+  console.log(`✅ Generated icon-${size}.png`);
+}
+
+console.log('\n🎉 All PWA icons generated successfully!');
