@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>YNote Archive - Digital Vault</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Source+Serif+4:opsz,wght@8..60,400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .glass-card {
+            background: rgba(23, 31, 51, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(195, 192, 255, 0.1);
+        }
+        .glass-card:hover {
+            border-color: rgba(195, 192, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .timeline-rail {
+            width: 2px;
+            background: linear-gradient(to bottom, #2d3449, #464553, #2d3449);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0b1326;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #464553;
+            border-radius: 10px;
+        }
+        .radial-glow {
+            background: radial-gradient(circle at 50% 50%, rgba(195, 192, 255, 0.05) 0%, transparent 70%);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary": "#a8cfbc",
+                      "on-tertiary-container": "#91b9a5",
+                      "on-primary-container": "#a9a7ff",
+                      "surface-container": "#171f33",
+                      "secondary": "#bfc6dd",
+                      "on-primary-fixed": "#0f0069",
+                      "primary-fixed": "#e2dfff",
+                      "secondary-fixed-dim": "#bfc6dd",
+                      "secondary-fixed": "#dbe2fa",
+                      "tertiary-fixed-dim": "#a8cfbc",
+                      "surface-container-high": "#222a3d",
+                      "secondary-container": "#41495c",
+                      "primary-fixed-dim": "#c3c0ff",
+                      "on-surface-variant": "#c8c4d5",
+                      "surface-container-low": "#131b2e",
+                      "on-background": "#dae2fd",
+                      "tertiary-fixed": "#c3ecd7",
+                      "surface-variant": "#2d3449",
+                      "surface-container-lowest": "#060e20",
+                      "on-tertiary-fixed": "#002115",
+                      "on-secondary-fixed-variant": "#3f4759",
+                      "tertiary-container": "#264a3b",
+                      "outline": "#918f9e",
+                      "on-surface": "#dae2fd",
+                      "primary-container": "#3730a3",
+                      "on-secondary-container": "#b1b8cf",
+                      "on-error": "#690005",
+                      "inverse-primary": "#544fc0",
+                      "background": "#0b1326",
+                      "on-tertiary-fixed-variant": "#294e3f",
+                      "error-container": "#93000a",
+                      "on-secondary-fixed": "#141b2c",
+                      "on-primary": "#231691",
+                      "surface": "#0b1326",
+                      "surface-bright": "#31394d",
+                      "on-primary-fixed-variant": "#3b35a7",
+                      "surface-dim": "#0b1326",
+                      "on-secondary": "#293042",
+                      "on-error-container": "#ffdad6",
+                      "outline-variant": "#464553",
+                      "error": "#ffb4ab",
+                      "surface-tint": "#c3c0ff",
+                      "inverse-surface": "#dae2fd",
+                      "primary": "#c3c0ff",
+                      "surface-container-highest": "#2d3449",
+                      "on-tertiary": "#113729",
+                      "inverse-on-surface": "#283044"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "container-padding-mobile": "20px",
+                      "card-gap": "24px",
+                      "gutter": "16px",
+                      "base": "8px",
+                      "container-padding-desktop": "40px"
+              },
+              "fontFamily": {
+                      "body-lg": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "body-md": ["Inter"],
+                      "meta-detail": ["Inter"],
+                      "display-lg-mobile": ["\"Source Serif 4\""],
+                      "display-lg": ["\"Source Serif 4\""],
+                      "headline-md": ["\"Source Serif 4\""]
+              },
+              "fontSize": {
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "label-sm": ["13px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "meta-detail": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                      "display-lg-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen custom-scrollbar overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top App Bar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 flex items-center justify-between px-container-padding-mobile md:px-container-padding-desktop h-16 transition-all">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant/50 cursor-pointer active:scale-95 transition-transform" onclick="location.href='settings.html'">
+<img class="w-full h-full object-cover" data-alt="thoughtful person avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfkvrAXjhjcMGHVcdg7d8WgxBF67IJU-UqYOwHGzEEVqtIaBLEN1fjOXe9NUf-j-s5QGdTu5qjVLi3bpZ1hdtZKY4r4EBvkEjAttSFKRnJxHJh73d4tntUnZBSNWfU9fAg2O2cj63c7frtdoBzF2OGYvM8UTfLPdMEv5G-e7rVxG8w3wNhz3TnlKxf5eovqzWMDc0GXWpLhdzvvH6Kf3yza5T9SK4DCB05kmMstr2MWoNKOGI1m7DhZd5RieNLd8soOFV_dEsD5jg"/>
+</div>
+<h1 class="font-display-lg text-headline-md text-primary tracking-tight cursor-pointer" onclick="location.href='dashboard.html'">YNote</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-surface-variant/50 transition-colors text-on-surface-variant active:scale-95 duration-200" onclick="location.href='search_memories.html'">
+<span class="material-symbols-outlined">search</span>
+</button>
+<button class="p-2 rounded-full hover:bg-surface-variant/50 transition-colors text-on-surface-variant active:scale-95 duration-200" onclick="location.href='media_vault.html'">
+<span class="material-symbols-outlined">folder_zip</span>
+</button>
+</div>
+</header>
+<main class="pt-24 pb-32 px-container-padding-mobile md:px-container-padding-desktop max-w-[1024px] mx-auto relative radial-glow">
+<!-- Archive Header -->
+<div class="mb-10">
+<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary mb-2">Archive</h2>
+<p class="text-on-surface-variant font-body-md">A chronological journey through your thoughts and transformations.</p>
+</div>
+<!-- Timeline Month: October -->
+<section class="relative mb-12">
+<div class="flex items-center gap-4 mb-6">
+<div class="px-4 py-1.5 rounded-full bg-secondary-container/50 border border-outline-variant/30 text-on-secondary-container font-label-sm uppercase tracking-widest">October 2023</div>
+<div class="flex-grow h-px bg-outline-variant/20"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-card-gap">
+<!-- Journal Card 1 -->
+<article class="glass-card rounded-xl p-6 flex flex-col gap-4 group cursor-pointer transition-all" onclick="location.href='new_entry.html'">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-tertiary-container/30 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">eco</span>
+</div>
+<div>
+<span class="block text-on-surface-variant font-label-sm text-meta-detail">OCT 24, 2023</span>
+<span class="inline-block px-2 py-0.5 rounded-md bg-tertiary/10 text-tertiary text-xs font-semibold">Calm</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors">push_pin</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">The Morning Mist on Willow Lake</h3>
+<p class="text-on-surface-variant line-clamp-3">The way the light hit the water today reminded me that clarity doesn't always mean seeing everything perfectly—sometimes the beauty is in the blurred edges...</p>
+<div class="h-40 w-full rounded-lg overflow-hidden border border-outline-variant/30">
+<img class="w-full h-full object-cover" data-alt="misty lake dawn" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwIAoO654A6fCaIx7Jd5K3TExEdgq6XClehWOKWZB7iZwHLOD2KOIslUsZze1y9BOY0r9wm9ByPF-3epLl7Y2P_Nk6tsI9CyYAlk7vZda3mhHqIIBrjoxn1ssXrbbQZoneJ1zSIiDQmD9KMfvNVVP2jpuTatmR5n2zxcz_jRDyk3-RkFLGMXWZFyX0CGgVi0SUKkX-n33u2lhefS6ntnXFHY31rmkopHh9plaZmTt0A4LKh8z3w3QW747sUwZKVQV_a6YdVgZwEVM"/>
+</div>
+</article>
+<!-- Journal Card 2 -->
+<article class="glass-card rounded-xl p-6 flex flex-col gap-4 group cursor-pointer transition-all" onclick="location.href='new_entry.html'">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container/30 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<div>
+<span class="block text-on-surface-variant font-label-sm text-meta-detail">OCT 18, 2023</span>
+<span class="inline-block px-2 py-0.5 rounded-md bg-primary/10 text-primary text-xs font-semibold">Thoughtful</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant">favorite</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Digital Detox Reflections</h3>
+<p class="text-on-surface-variant">Three days without a screen and I've started noticing the specific shade of gold the sun turns at 4 PM. My focus is returning, slowly but surely. It's like my mind is a room being cleared of clutter...</p>
+</article>
+</div>
+</section>
+<!-- Timeline Month: September -->
+<section class="relative mb-12">
+<div class="flex items-center gap-4 mb-6">
+<div class="px-4 py-1.5 rounded-full bg-secondary-container/30 border border-outline-variant/30 text-on-secondary-container font-label-sm uppercase tracking-widest">September 2023</div>
+<div class="flex-grow h-px bg-outline-variant/20"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-card-gap">
+<!-- Journal Card 3 (Bento Style) -->
+<article class="glass-card rounded-xl p-6 md:col-span-2 flex flex-col md:flex-row gap-6 group cursor-pointer transition-all" onclick="location.href='new_entry.html'">
+<div class="flex-1 flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-container/30 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div>
+<span class="block text-on-surface-variant font-label-sm text-meta-detail">SEP 30, 2023</span>
+<span class="inline-block px-2 py-0.5 rounded-md bg-secondary/10 text-secondary text-xs font-semibold">Deep</span>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">The Architecture of Silence</h3>
+<p class="text-on-surface-variant">Exploring the concept that silence isn't just the absence of noise, but a space where truth can finally breathe. I spent the afternoon at the city library, watching dust motes dance in the silence between the shelves...</p>
+<div class="mt-auto flex gap-2">
+<span class="px-3 py-1 rounded-full bg-surface-variant/50 text-on-surface-variant text-xs border border-outline-variant/20">#philosophy</span>
+<span class="px-3 py-1 rounded-full bg-surface-variant/50 text-on-surface-variant text-xs border border-outline-variant/20">#growth</span>
+</div>
+</div>
+<div class="md:w-1/3 h-56 md:h-auto rounded-lg overflow-hidden border border-outline-variant/30">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="minimalist library interior" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwLhIVX1-Lm2WZ85FFb7ioesvVBvZKOeQbyh9cyRYyPdS3V8A3ikg1lTn4BxtZXtnP8oRRIuSoLG-qqE7-YIBMsVwsW0nCsCmBWkxIMBFJ1yCfKSFcKk_DpcvyrJ0V-soXGA598pFCmQZSRyfjrdHKqJlhRllebqaW1R96iQWYwZwMPtVtpQ_jkRYN188WHWj1N7UhYPLUa6jFqMU9WnYvsmHHGa66NYq4M_7f8fT8uPKCaEtS3BFaIy2-VnPG_LDmUnHztCxHcgg"/>
+</div>
+</article>
+<!-- Journal Card 4 -->
+<article class="glass-card rounded-xl p-6 flex flex-col gap-4 group cursor-pointer transition-all" onclick="location.href='new_entry.html'">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-error-container/20 flex items-center justify-center text-error">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<div>
+<span class="block text-on-surface-variant font-label-sm text-meta-detail">SEP 12, 2023</span>
+<span class="inline-block px-2 py-0.5 rounded-md bg-error/10 text-error text-xs font-semibold">Energetic</span>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">New Project Launch</h3>
+<p class="text-on-surface-variant line-clamp-2">Finally hitting the 'deploy' button. The adrenaline is real. Note to self: remember this feeling when things get tough later on.</p>
+</article>
+<!-- Journal Card 5 -->
+<article class="glass-card rounded-xl p-6 flex flex-col gap-4 group cursor-pointer transition-all" onclick="location.href='new_entry.html'">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-tertiary-container/30 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">nightlight</span>
+</div>
+<div>
+<span class="block text-on-surface-variant font-label-sm text-meta-detail">SEP 05, 2023</span>
+<span class="inline-block px-2 py-0.5 rounded-md bg-tertiary/10 text-tertiary text-xs font-semibold">Peaceful</span>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Midnight Walk</h3>
+<p class="text-on-surface-variant line-clamp-2">The city is so different when everyone else is asleep. The shadows are long and the neon signs look like watercolor paintings on the wet pavement.</p>
+</article>
+</div>
+</section>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed right-6 bottom-24 md:right-10 md:bottom-28 w-16 h-16 rounded-full bg-primary text-on-primary shadow-2xl flex items-center justify-center hover:bg-primary/90 hover:scale-110 active:scale-95 transition-all z-50 group" onclick="location.href='new_entry.html'">
+<span class="material-symbols-outlined text-3xl font-bold group-hover:rotate-90 transition-transform duration-300">add</span>
+</button>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center pt-2 pb-6 px-4 bg-surface-container-low/90 dark:bg-surface-container-low/90 backdrop-blur-xl border-t border-outline-variant/20 shadow-lg">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all active:scale-90 duration-200" href="dashboard.html">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 duration-200" href="all_memories.html">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">folder_open</span>
+<span class="font-label-sm text-label-sm">Archive</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all active:scale-90 duration-200" href="analytics.html">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-sm text-label-sm">Analytics</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all active:scale-90 duration-200" href="settings.html">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</a>
+</nav>
+<!-- Background Atmospheric Effect -->
+<div class="fixed inset-0 pointer-events-none z-[-1] opacity-30">
+</div>
+<script>
+        // Micro-interaction for scroll reveals
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100', 'translate-y-0');
+                    entry.target.classList.remove('opacity-0', 'translate-y-10');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('article, section > div').forEach(el => {
+            el.classList.add('opacity-0', 'translate-y-10', 'transition-all', 'duration-700', 'ease-out');
+            observer.observe(el);
+        });
+
+        // Simple header scroll behavior
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll <= 0) {
+                header.classList.remove('shadow-lg');
+                return;
+            }
+            
+            if (currentScroll > lastScroll) {
+                // Scrolling down
+                header.style.transform = 'translateY(-100%)';
+            } else {
+                // Scrolling up
+                header.style.transform = 'translateY(0)';
+                header.classList.add('shadow-lg');
+            }
+            lastScroll = currentScroll;
+        });
+    </script>
+</body></html>

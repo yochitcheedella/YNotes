@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>YNote - Secure Sanctuary Editor</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Source+Serif+4:opsz,wght@8..60,400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed-dim": "#a8cfbc",
+                    "on-primary": "#231691",
+                    "inverse-primary": "#544fc0",
+                    "on-tertiary-fixed": "#002115",
+                    "secondary-fixed": "#dbe2fa",
+                    "error-container": "#93000a",
+                    "on-surface": "#dae2fd",
+                    "on-primary-container": "#a9a7ff",
+                    "tertiary": "#a8cfbc",
+                    "on-error": "#690005",
+                    "surface-container-highest": "#2d3449",
+                    "on-tertiary-container": "#91b9a5",
+                    "secondary": "#bfc6dd",
+                    "on-secondary": "#293042",
+                    "on-primary-fixed-variant": "#3b35a7",
+                    "on-primary-fixed": "#0f0069",
+                    "surface-dim": "#0b1326",
+                    "surface-tint": "#c3c0ff",
+                    "surface-container-high": "#222a3d",
+                    "on-background": "#dae2fd",
+                    "on-tertiary": "#113729",
+                    "primary-fixed-dim": "#c3c0ff",
+                    "on-surface-variant": "#c8c4d5",
+                    "outline-variant": "#464553",
+                    "primary-fixed": "#e2dfff",
+                    "primary-container": "#3730a3",
+                    "surface-variant": "#2d3449",
+                    "primary": "#c3c0ff",
+                    "surface-bright": "#31394d",
+                    "inverse-surface": "#dae2fd",
+                    "on-error-container": "#ffdad6",
+                    "tertiary-fixed": "#c3ecd7",
+                    "inverse-on-surface": "#283044",
+                    "on-secondary-container": "#b1b8cf",
+                    "on-secondary-fixed": "#141b2c",
+                    "on-secondary-fixed-variant": "#3f4759",
+                    "surface": "#0b1326",
+                    "secondary-container": "#41495c",
+                    "surface-container-low": "#131b2e",
+                    "surface-container-lowest": "#060e20",
+                    "secondary-fixed-dim": "#bfc6dd",
+                    "surface-container": "#171f33",
+                    "background": "#0b1326",
+                    "outline": "#918f9e",
+                    "tertiary-container": "#264a3b",
+                    "on-tertiary-fixed-variant": "#294e3f",
+                    "error": "#ffb4ab"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "container-padding-desktop": "40px",
+                    "base": "8px",
+                    "container-padding-mobile": "20px",
+                    "card-gap": "24px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Source Serif 4"],
+                    "headline-md": ["Source Serif 4"],
+                    "body-md": ["Inter"],
+                    "meta-detail": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "display-lg-mobile": ["Source Serif 4"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "meta-detail": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                    "label-sm": ["13px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "display-lg-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0b1326;
+            color: #dae2fd;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(19, 27, 46, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(195, 192, 255, 0.1);
+        }
+        .writing-area:focus {
+            outline: none;
+        }
+        .mood-chip-active {
+            background-color: #41495c;
+            box-shadow: 0 0 15px rgba(195, 192, 255, 0.2);
+            border-color: #c3c0ff;
+        }
+        .glow-accent {
+            background: radial-gradient(circle at 50% 50%, rgba(195, 192, 255, 0.08) 0%, transparent 70%);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #464553; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #918f9e; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-body-md selection:bg-primary/30 min-h-screen">
+<!-- Global Background Elements -->
+<div class="fixed inset-0 glow-accent pointer-events-none z-0"></div>
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 h-16 flex items-center justify-between px-container-padding-mobile md:px-container-padding-desktop">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-variant/50 transition-colors p-2 rounded-full active:scale-95" onclick="location.href='dashboard.html'">arrow_back</button>
+<h1 class="font-display-lg text-primary tracking-tight md:text-display-lg text-display-lg-mobile">YNote</h1>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant hover:bg-surface-variant/50 transition-colors p-2 rounded-full cursor-pointer active:scale-95" data-icon="search" onclick="location.href='search_memories.html'">search</span>
+<div class="w-10 h-10 rounded-full border border-primary/20 bg-surface-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A sophisticated portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoBUvDpDfHkzMJdt8AbvpuJYKNTMEKadqIZvm-28oSUaMo9j6RA7GSV5vkdF_r25mB_IxjeMqzJXs71dg48gl3a3sLzGI3fHcQKHwe_SAtbjZKwiFfuFlmt2exeNeRAGwt8F3osmXPj6QjqEAO8ynXNnpaqq2izKL4xzP6EdhJGBykLcqaPeAVr0j_--bTZn73YWG1WsqFGMn4Bos8Br_MLfLj-daCaY0IL2ygkwFV96jYaMZO3Ad9TYq8Lbt2BDciJ6RsiugRDEc"/>
+</div>
+</div>
+</header>
+<main class="relative z-10 pt-24 pb-32 px-container-padding-mobile md:px-0">
+<div class="max-w-[1024px] mx-auto space-y-8">
+<!-- Date & Header Section -->
+<section class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="space-y-2">
+<div class="flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+<input class="bg-transparent border-none font-label-sm text-label-sm text-primary focus:ring-0 p-0 cursor-pointer" type="date" value="2023-10-27"/>
+<span class="text-outline-variant">•</span>
+<input class="bg-transparent border-none font-label-sm text-label-sm text-primary focus:ring-0 p-0 cursor-pointer" type="time" value="20:45"/>
+</div>
+<input class="w-full bg-transparent border-none font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface focus:ring-0 placeholder:text-surface-variant p-0" placeholder="Untitled Reflection" type="text" id="entry-title"/>
+</div>
+<!-- Mood Selector -->
+<div class="glass-panel p-4 rounded-xl flex flex-col gap-3 min-w-[280px]">
+<span class="font-label-sm text-label-sm text-on-surface-variant px-1">HOW ARE YOU FEELING?</span>
+<div class="flex justify-between items-center gap-2" id="mood-selector">
+<button class="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-surface-variant/30 transition-all group" onclick="selectMood(this, 'Happy')">
+<span class="material-symbols-outlined text-tertiary-fixed-dim group-hover:scale-110 transition-transform" style="font-variation-settings: 'FILL' 0;">sentiment_very_satisfied</span>
+<span class="font-meta-detail text-meta-detail text-on-surface-variant">Happy</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-surface-variant/30 transition-all group" onclick="selectMood(this, 'Normal')">
+<span class="material-symbols-outlined text-secondary group-hover:scale-110 transition-transform" style="font-variation-settings: 'FILL' 0;">sentiment_neutral</span>
+<span class="font-meta-detail text-meta-detail text-on-surface-variant">Normal</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-surface-variant/30 transition-all group" onclick="selectMood(this, 'Sad')">
+<span class="material-symbols-outlined text-on-primary-container group-hover:scale-110 transition-transform" style="font-variation-settings: 'FILL' 0;">sentiment_very_dissatisfied</span>
+<span class="font-meta-detail text-meta-detail text-on-surface-variant">Sad</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-surface-variant/30 transition-all group" onclick="selectMood(this, 'Angry')">
+<span class="material-symbols-outlined text-error group-hover:scale-110 transition-transform" style="font-variation-settings: 'FILL' 0;">sentiment_extremely_dissatisfied</span>
+<span class="font-meta-detail text-meta-detail text-on-surface-variant">Angry</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-surface-variant/30 transition-all group mood-chip-active" onclick="selectMood(this, 'Excited')">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-meta-detail text-meta-detail text-on-surface-variant">Excited</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Main Writing Canvas -->
+<section class="relative">
+<div class="glass-panel min-h-[500px] rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden group">
+<!-- Subtle Thread of Time rail -->
+<div class="absolute left-4 top-12 bottom-12 w-[1px] bg-outline-variant/20 hidden md:block"></div>
+<textarea class="writing-area w-full min-h-[400px] bg-transparent border-none font-body-lg text-body-lg leading-relaxed text-on-surface placeholder:text-surface-variant resize-none" id="entry-content" placeholder="Begin your journey here... The sanctuary is yours. Your thoughts are encrypted, your soul is safe."></textarea>
+<!-- Media Attachment Floating Bar -->
+<div class="mt-8 flex flex-wrap items-center gap-4 pt-8 border-t border-outline-variant/20">
+<div class="flex items-center gap-2 text-on-surface-variant font-label-sm text-label-sm uppercase tracking-widest mr-2">
+<span class="material-symbols-outlined text-base">attach_file</span>
+                            Attachments
+                        </div>
+<button class="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 transition-colors group">
+<span class="material-symbols-outlined text-primary group-hover:rotate-12 transition-transform">image</span>
+<span class="font-meta-detail text-meta-detail">Image</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 transition-colors group">
+<span class="material-symbols-outlined text-tertiary group-hover:scale-110 transition-transform">mic</span>
+<span class="font-meta-detail text-meta-detail">Voice</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 transition-colors group">
+<span class="material-symbols-outlined text-secondary group-hover:translate-y-[-2px] transition-transform">movie</span>
+<span class="font-meta-detail text-meta-detail">Video</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 transition-colors group">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:skew-x-2 transition-transform">description</span>
+<span class="font-meta-detail text-meta-detail">Document</span>
+</button>
+</div>
+</div>
+<!-- Bio-Lock Floating Indicator -->
+<div class="absolute -right-4 top-1/2 -translate-y-1/2 hidden xl:flex flex-col items-center gap-4 opacity-50 hover:opacity-100 transition-opacity">
+<div class="p-3 rounded-full bg-primary-container text-on-primary-container shadow-lg animate-pulse">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">lock</span>
+</div>
+<span class="[writing-mode:vertical-rl] font-label-sm text-label-sm text-outline tracking-tighter uppercase">End-to-End Encrypted</span>
+</div>
+</section>
+<!-- Actions -->
+<section class="flex flex-col md:flex-row items-center justify-between gap-6 pb-20">
+<div class="flex gap-4">
+<button class="flex items-center gap-2 px-6 py-3 rounded-xl border border-outline-variant/30 hover:bg-surface-variant/50 transition-colors" onclick="location.href='dashboard.html'">
+<span class="material-symbols-outlined text-on-surface-variant">delete_outline</span>
+<span class="font-label-sm text-label-sm uppercase">Discard</span>
+</button>
+<button class="flex items-center gap-2 px-6 py-3 rounded-xl border border-outline-variant/30 hover:bg-surface-variant/50 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">visibility_off</span>
+<span class="font-label-sm text-label-sm uppercase">Incognito</span>
+</button>
+</div>
+<button class="w-full md:w-auto flex items-center justify-center gap-3 px-10 py-4 bg-primary text-on-primary rounded-2xl shadow-[0_10px_30px_rgba(195,192,255,0.2)] hover:shadow-[0_15px_40px_rgba(195,192,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all group overflow-hidden relative" onclick="saveEntry()">
+<div class="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out"></div>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">security</span>
+<span class="font-label-sm text-label-sm uppercase font-bold tracking-widest">Secure &amp; Save Entry</span>
+</button>
+</section>
+</div>
+</main>
+<!-- BottomNavBar (Only for mobile navigation context) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center pt-2 pb-6 px-4 bg-surface-container-low/90 dark:bg-surface-container-low/90 backdrop-blur-xl border-t border-outline-variant/20 shadow-lg md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all active:scale-90 duration-200" href="dashboard.html">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 duration-200" href="new_entry.html">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<span class="font-label-sm text-label-sm">New Entry</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all active:scale-90 duration-200" href="analytics.html">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-sm text-label-sm">Analytics</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all active:scale-90 duration-200" href="settings.html">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</a>
+</nav>
+<script>
+        let selectedMoodValue = 'Excited';
+        function selectMood(element, mood) {
+            // Remove active class from all mood chips
+            const chips = document.querySelectorAll('#mood-selector button');
+            chips.forEach(chip => {
+                chip.classList.remove('mood-chip-active');
+                const icon = chip.querySelector('.material-symbols-outlined');
+                icon.style.fontVariationSettings = "'FILL' 0";
+            });
+            
+            // Add active class to selected chip
+            element.classList.add('mood-chip-active');
+            const activeIcon = element.querySelector('.material-symbols-outlined');
+            activeIcon.style.fontVariationSettings = "'FILL' 1";
+            
+            selectedMoodValue = mood;
+            
+            // Create a small feedback effect
+            const glow = document.querySelector('.glow-accent');
+            const color = window.getComputedStyle(activeIcon).color;
+            glow.style.background = `radial-gradient(circle at 50% 50%, ${color}15 0%, transparent 70%)`;
+        }
+
+        function saveEntry() {
+            const title = document.getElementById('entry-title').value || 'Untitled Reflection';
+            const content = document.getElementById('entry-content').value;
+            if(!content) {
+                alert("Please write something first!");
+                return;
+            }
+            alert(`Entry Saved! \nTitle: ${title} \nMood: ${selectedMoodValue} \nStatus: Encrypted with AES-256`);
+            location.href = 'dashboard.html';
+        }
+
+        // Auto-save simulation
+        let timer;
+        const textarea = document.querySelector('textarea');
+        textarea.addEventListener('input', () => {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                console.log('Draft saved to vault...');
+            }, 2000);
+        });
+    </script>
+</body></html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>YNote - Media Vault</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#a8cfbc",
+                    "on-tertiary-container": "#91b9a5",
+                    "on-primary-container": "#a9a7ff",
+                    "surface-container": "#171f33",
+                    "secondary": "#bfc6dd",
+                    "on-primary-fixed": "#0f0069",
+                    "primary-fixed": "#e2dfff",
+                    "secondary-fixed-dim": "#bfc6dd",
+                    "secondary-fixed": "#dbe2fa",
+                    "tertiary-fixed-dim": "#a8cfbc",
+                    "surface-container-high": "#222a3d",
+                    "secondary-container": "#41495c",
+                    "primary-fixed-dim": "#c3c0ff",
+                    "on-surface-variant": "#c8c4d5",
+                    "surface-container-low": "#131b2e",
+                    "on-background": "#dae2fd",
+                    "tertiary-fixed": "#c3ecd7",
+                    "surface-variant": "#2d3449",
+                    "surface-container-lowest": "#060e20",
+                    "on-tertiary-fixed": "#002115",
+                    "on-secondary-fixed-variant": "#3f4759",
+                    "tertiary-container": "#264a3b",
+                    "outline": "#918f9e",
+                    "on-surface": "#dae2fd",
+                    "primary-container": "#3730a3",
+                    "on-secondary-container": "#b1b8cf",
+                    "on-error": "#690005",
+                    "inverse-primary": "#544fc0",
+                    "background": "#0b1326",
+                    "on-tertiary-fixed-variant": "#294e3f",
+                    "error-container": "#93000a",
+                    "on-secondary-fixed": "#141b2c",
+                    "on-primary": "#231691",
+                    "surface": "#0b1326",
+                    "surface-bright": "#31394d",
+                    "on-primary-fixed-variant": "#3b35a7",
+                    "surface-dim": "#0b1326",
+                    "on-secondary": "#293042",
+                    "on-error-container": "#ffdad6",
+                    "outline-variant": "#464553",
+                    "error": "#ffb4ab",
+                    "surface-tint": "#c3c0ff",
+                    "inverse-surface": "#dae2fd",
+                    "primary": "#c3c0ff",
+                    "surface-container-highest": "#2d3449",
+                    "on-tertiary": "#113729",
+                    "inverse-on-surface": "#283044"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "container-padding-mobile": "20px",
+                    "card-gap": "24px",
+                    "gutter": "16px",
+                    "base": "8px",
+                    "container-padding-desktop": "40px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "body-md": ["Inter"],
+                    "meta-detail": ["Inter"],
+                    "display-lg-mobile": ["\"Source Serif 4\""],
+                    "display-lg": ["\"Source Serif 4\""],
+                    "headline-md": ["\"Source Serif 4\""]
+            },
+            "fontSize": {
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-sm": ["13px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "meta-detail": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                    "display-lg-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0b1326;
+            color: #dae2fd;
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-panel {
+            background: rgba(23, 31, 51, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(195, 192, 255, 0.1);
+        }
+        .vault-gradient {
+            background: radial-gradient(circle at 50% 50%, rgba(55, 48, 163, 0.15) 0%, rgba(11, 19, 38, 0) 70%);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-tab {
+            border-bottom: 2px solid #c3c0ff;
+            color: #c3c0ff;
+        }
+        .encrypted-badge {
+            background: rgba(11, 19, 38, 0.8);
+            backdrop-filter: blur(4px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-body-md overflow-x-hidden selection:bg-primary/30">
+<!-- Top Navigation Anchor -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 flex items-center justify-between px-container-padding-mobile md:px-container-padding-desktop h-16 w-full">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant hover:bg-surface-variant/50 transition-colors p-2 rounded-full cursor-pointer" onclick="location.href='dashboard.html'">arrow_back</span>
+<span class="font-display-lg text-display-lg text-primary tracking-tight cursor-pointer" onclick="location.href='dashboard.html'">YNote</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-variant/50 transition-colors p-2 rounded-full active:scale-95 transition-transform" onclick="location.href='search_memories.html'">search</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-primary/20 cursor-pointer" onclick="location.href='settings.html'">
+<img class="w-full h-full object-cover" data-alt="User profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjlZDkrGFTok2NzQf4tqFEeeEbu2wCXoxfltCR1HEhYHzqOr9F6Ob4ILhgaZ8b-jCnPraix0LtYEJQt1x6WRPIO6vPZuWPce4IvSwvAg_0acUVTVpBAo2-AUzPByIQK1TCZGAf7Rl7ysUziTL7ft7U3TS7_wvm1YIVohXJzpcFzKBp3JbeEcLww3H_ejwpa1tGY_RCwbNoNTK87UN5HGx-BuuveWHjJZzizxfhadMWKDl_jlhIojRx1YCuHi38l2feFhzHkPs26yM"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-32 min-h-screen vault-gradient">
+<div class="max-w-[1024px] mx-auto px-container-padding-mobile md:px-container-padding-desktop">
+<!-- Vault Status & Header -->
+<div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<h1 class="font-headline-md text-headline-md text-primary mb-2">Media Vault</h1>
+<div class="flex items-center gap-2 text-tertiary">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">lock</span>
+<span class="font-label-sm text-label-sm uppercase tracking-widest">AES-256 Encrypted</span>
+</div>
+</div>
+<!-- Tab Navigation -->
+<nav class="flex gap-8 border-b border-outline-variant/20 overflow-x-auto no-scrollbar">
+<button class="active-tab pb-3 font-label-sm text-label-sm transition-colors whitespace-nowrap">Images</button>
+<button class="pb-3 text-on-surface-variant hover:text-primary transition-colors font-label-sm text-label-sm whitespace-nowrap">Voice Notes</button>
+<button class="pb-3 text-on-surface-variant hover:text-primary transition-colors font-label-sm text-label-sm whitespace-nowrap">Documents</button>
+</nav>
+</div>
+<!-- Bento Grid Gallery -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+<!-- Large Feature Item -->
+<div class="col-span-2 row-span-2 group relative overflow-hidden rounded-xl glass-panel aspect-square md:aspect-auto cursor-pointer" onclick="location.href='new_entry.html'">
+<div class="absolute inset-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-surface-container-lowest/90 to-transparent flex flex-col justify-end p-4">
+<p class="font-label-sm text-label-sm text-primary">Dec 14, 2023</p>
+<h3 class="font-body-md text-body-md font-bold">Reflections on Minimalism</h3>
+</div>
+<div class="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2 py-1 rounded-full encrypted-badge border border-primary/20">
+<span class="material-symbols-outlined text-[14px] text-primary" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<span class="font-meta-detail text-meta-detail text-primary uppercase">Encrypted</span>
+</div>
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="misty mountain range" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBjX88_xW2VelCAJgCoiNMizrS-Jx_IiyGSkzGMORk8qhEpjAFe5aelrcWKpkbpVmGQRBzEQZkZx8sAlCNZpRuu457CwJ1gHxys1leeBVPxTSjQ71VKjAbXoCrmpv18Hko5a99TkswVTh6d8-Uo70cQXNdhTpjZuroXTfT19tOVyu4lwSH17Vn5b2O778Ezj0Wm5Q2GpZWydYJAatShRga97AmHmZBC47NK4-jK46euO8K2wUfL-813yAhb0VxSPqVzqliyZJlqHA"/>
+</div>
+<!-- Regular Items -->
+<div class="group relative overflow-hidden rounded-xl glass-panel aspect-square cursor-pointer" onclick="location.href='new_entry.html'">
+<div class="absolute top-2 right-2 z-20">
+<span class="material-symbols-outlined text-primary text-[18px]">lock</span>
+</div>
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="architectural concrete" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9k4ukiIL_H0j_oJOuu9fgsKAQdTMNqTHAGv4bT6Teul0hBYmucgJLAiuGkFqYE8-fLFrmtAeZEERZL1E5mvTBhXPRKrmmoCK9Hr_KYYPKyDaHo13blOMWB1YdbqnHc3oiGzll-4BGXuEztT1Q4ueUTs5Z8ZA8bQlbtKJRxFAdxhDpUc8JygjuFPPRd7yDl0yjT-4LYaXhjYivrGK4AtJh84jy7aocXW7TAC3TjN2j1HwPrQ4BwENTwui-F96BAOJ9hy_NZ27av2I"/>
+</div>
+<div class="group relative overflow-hidden rounded-xl glass-panel aspect-square cursor-pointer" onclick="location.href='new_entry.html'">
+<div class="absolute top-2 right-2 z-20">
+<span class="material-symbols-outlined text-primary text-[18px]">lock</span>
+</div>
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="indigo light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDblZFYwVJ8lMYm_OW6Ur74R75z1ij22eJrkqsOrfHJnITWF7Wg5OoN_PHrEEi0FajkrayRNZ-6sPQipOx0VJWrvVnLrUsxq17ch43yx0o9WJzSyFl5e8kciy4wk_Qg05S0ytPL2UQGcGvnqrTxF993wEME0nTiCYvs9ajoYyX9Rx0UWkT1XABraRsgi3jtbTcFVWryPUImhbHKwH7SKf1pAaYYYwLLElXleLzsCrcHDTsMPc6ZMZpfxWKEIbXvv22FWJGimjBy1go"/>
+</div>
+<div class="group relative overflow-hidden rounded-xl glass-panel aspect-square cursor-pointer" onclick="location.href='new_entry.html'">
+<div class="absolute top-2 right-2 z-20">
+<span class="material-symbols-outlined text-primary text-[18px]">lock</span>
+</div>
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="fountain pen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBilFylTlHzx-IuL4b_ElGzhejPRZ8bm0iGfAYgbE7X8Iol6JM5KfDwRfZSQge_tqHM4FxhyswpoawAHQTV-3BTrDhhMJma0bSLaWtycKSCEQyjV4BkIXnRaa2uW6ttVQrTiRsFkMqSV5oSRihOl0pVhigaVZQECEH9QvlSVeHYgpGhqx2zQ1W5IUTzlblsg4CYh-AIq2S_Txg1Uvy6BCafhU0X3m11ljylI0Twvyk_aQRpuO2JgyON4PZrx-rCt6VMpMRi91e8K_8"/>
+</div>
+<div class="group relative overflow-hidden rounded-xl glass-panel aspect-square cursor-pointer" onclick="location.href='new_entry.html'">
+<div class="absolute top-2 right-2 z-20">
+<span class="material-symbols-outlined text-primary text-[18px]">lock</span>
+</div>
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="tech gear layout" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhFesqdtHUqlWgbz6e8rw0ZVyNHr4s2zkimMF3gG4R_CrcfrFiE6GR6DMxM8ztyuYQydyI6N0NtoLus0tk7lNkxPhY-wU07gdzKNJ7s2paVqWqzU3udKDiEMt6oDTVgKwSNavxQJ3dRFp-VQEkIZCRZWxuvAaI-gQEUmGSyadjVCUdVexUf-ZpR9youx_8rlwwb606PFMpDwK07ROW4wCXMz3lwM-e3irqvsXqsT2BblOV-_6fmvKuPcY4fydmo_vBlc-DyV-Pkzo"/>
+</div>
+<!-- Voice Note Teaser Card -->
+<div class="col-span-2 glass-panel rounded-xl p-6 flex items-center justify-between group hover:bg-surface-container/60 transition-all cursor-pointer border-l-2 border-l-primary/30" onclick="location.href='new_entry.html'">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">mic</span>
+</div>
+<div>
+<h4 class="font-body-md text-body-md font-bold">Late Night Thoughts</h4>
+<p class="font-meta-detail text-meta-detail text-on-surface-variant">Yesterday • 02:45</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="font-label-sm text-label-sm text-on-surface">3.4MB</span>
+<div class="flex gap-0.5">
+<div class="w-0.5 h-3 bg-primary/40 rounded-full"></div>
+<div class="w-0.5 h-5 bg-primary rounded-full"></div>
+<div class="w-0.5 h-4 bg-primary rounded-full"></div>
+<div class="w-0.5 h-6 bg-primary rounded-full"></div>
+<div class="w-0.5 h-2 bg-primary/40 rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="group relative overflow-hidden rounded-xl glass-panel aspect-square cursor-pointer" onclick="location.href='new_entry.html'">
+<div class="absolute top-2 right-2 z-20">
+<span class="material-symbols-outlined text-primary text-[18px]">lock</span>
+</div>
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="silk blue fabric" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjRAQZZAj0NNbez6s9Zwv-lG5PszvkAP_ZtSN782CW7Wp3mdOV_yqIEwEY6wPBAhJbRoIRcX6Wpahsj_hL3ssqZ5EkZC-DM9MDmOHNehZXQUcRMWRrnEoUVtUNo5Mr2g3W4PgC46RqFLBdoz6PPzN2d-mJaWp7lbskKjKAuhQw3epG7TA6qneBU-ulbH4PQfrMzEQfilmj7Vk9qx4d4Nefw-DmMEbS26jCKhRZ1fhs-LHNz7CDIDjkDRPG020WxdOl4kQcefv9AMQ"/>
+</div>
+<div class="group relative overflow-hidden rounded-xl glass-panel aspect-square cursor-pointer" onclick="location.href='new_entry.html'">
+<div class="absolute top-2 right-2 z-20">
+<span class="material-symbols-outlined text-primary text-[18px]">lock</span>
+</div>
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="modern spiral staircase" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwSxjf-4LrgtMogVHQKZiOe9eYKaI3nhWCNH9Ux_ii9axxKdKOBsOLEC2UtYxHAg_SGlODMEq8DKGTet5Ar3FxwzOIeSCcKJVp6glxwiMsccgFbpfmHX7zwIMmo5-MrVdzy4eIzJ9zHKPW7bH7yiggSmjHwnithcoNKBiAIpibF3L9vRgb9trdUoFAHuYlbl5nDiLe1XwssAHYrWRbTx1uawv7uPVNjsR_KEM536IoGbK1JzyDwD-Sqk7MS0eO_M7boFttHsd6Xc0"/>
+</div>
+</div>
+<!-- Empty State / Floating Tip -->
+<div class="mt-12 p-8 rounded-2xl border border-dashed border-outline-variant/30 flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-[48px] text-outline-variant mb-4" style="font-variation-settings: 'FILL' 0, 'wght' 200;">upload_file</span>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-sm">Drag and drop files to encrypt them instantly in your private vault.</p>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Anchor -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center pt-2 pb-6 px-4 bg-surface-container-low/90 dark:bg-surface-container-low/90 backdrop-blur-xl border-t border-outline-variant/20 shadow-lg">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all active:scale-90 duration-200" href="dashboard.html">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-sm text-label-sm mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 duration-200" href="new_entry.html">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<span class="font-label-sm text-label-sm mt-1">New Entry</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all active:scale-90 duration-200" href="analytics.html">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-sm text-label-sm mt-1">Analytics</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all active:scale-90 duration-200" href="settings.html">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-sm text-label-sm mt-1">Settings</span>
+</a>
+</nav>
+<!-- Micro-interaction Scripts -->
+<script>
+        document.querySelectorAll('nav button').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active-tab', 'text-primary'));
+                document.querySelectorAll('nav button').forEach(btn => btn.classList.add('text-on-surface-variant'));
+                button.classList.add('active-tab');
+                button.classList.remove('text-on-surface-variant');
+            });
+        });
+
+        // Simple parallax effect on gallery items
+        window.addEventListener('mousemove', (e) => {
+            const amount = 5;
+            const x = (e.clientX / window.innerWidth - 0.5) * amount;
+            const y = (e.clientY / window.innerHeight - 0.5) * amount;
+            document.querySelectorAll('.glass-panel img').forEach(img => {
+                img.style.transform = `scale(1.05) translate(${x}px, ${y}px)`;
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>YNote - Search &amp; Discovery</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Source+Serif+4:opsz,wght@8..60,400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#a8cfbc",
+                    "on-tertiary-container": "#91b9a5",
+                    "on-primary-container": "#a9a7ff",
+                    "surface-container": "#171f33",
+                    "secondary": "#bfc6dd",
+                    "on-primary-fixed": "#0f0069",
+                    "primary-fixed": "#e2dfff",
+                    "secondary-fixed-dim": "#bfc6dd",
+                    "secondary-fixed": "#dbe2fa",
+                    "tertiary-fixed-dim": "#a8cfbc",
+                    "surface-container-high": "#222a3d",
+                    "secondary-container": "#41495c",
+                    "primary-fixed-dim": "#c3c0ff",
+                    "on-surface-variant": "#c8c4d5",
+                    "surface-container-low": "#131b2e",
+                    "on-background": "#dae2fd",
+                    "on-tertiary-fixed": "#002115",
+                    "on-secondary-fixed-variant": "#3f4759",
+                    "tertiary-container": "#264a3b",
+                    "outline": "#918f9e",
+                    "on-surface": "#dae2fd",
+                    "primary-container": "#3730a3",
+                    "on-secondary-container": "#b1b8cf",
+                    "on-error": "#690005",
+                    "inverse-primary": "#544fc0",
+                    "background": "#0b1326",
+                    "on-tertiary-fixed-variant": "#294e3f",
+                    "error-container": "#93000a",
+                    "on-secondary-fixed": "#141b2c",
+                    "on-primary": "#231691",
+                    "surface": "#0b1326",
+                    "surface-bright": "#31394d",
+                    "on-primary-fixed-variant": "#3b35a7",
+                    "surface-dim": "#0b1326",
+                    "on-secondary": "#293042",
+                    "on-error-container": "#ffdad6",
+                    "outline-variant": "#464553",
+                    "error": "#ffb4ab",
+                    "surface-tint": "#c3c0ff",
+                    "inverse-surface": "#dae2fd",
+                    "primary": "#c3c0ff",
+                    "surface-container-highest": "#2d3449",
+                    "on-tertiary": "#113729",
+                    "inverse-on-surface": "#283044"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "container-padding-mobile": "20px",
+                    "card-gap": "24px",
+                    "gutter": "16px",
+                    "base": "8px",
+                    "container-padding-desktop": "40px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "body-md": ["Inter"],
+                    "meta-detail": ["Inter"],
+                    "display-lg-mobile": ["\"Source Serif 4\""],
+                    "display-lg": ["\"Source Serif 4\""],
+                    "headline-md": ["\"Source Serif 4\""]
+            },
+            "fontSize": {
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-sm": ["13px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "meta-detail": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                    "display-lg-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(23, 31, 51, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(195, 192, 255, 0.1);
+        }
+        .glow-soft {
+            box-shadow: 0 0 30px rgba(195, 192, 255, 0.05);
+        }
+        .timeline-rail {
+            width: 2px;
+            background: linear-gradient(to bottom, transparent, #2d3449, transparent);
+        }
+        body {
+            background-color: #0b1326;
+            color: #dae2fd;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .scroll-hide::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-body-md overflow-x-hidden selection:bg-primary/30">
+<!-- Top Navigation Anchor -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 flex items-center justify-between px-container-padding-mobile md:px-container-padding-desktop h-16">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-primary/20 cursor-pointer" onclick="location.href='dashboard.html'">
+<img class="w-full h-full object-cover" data-alt="User profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUXSHlC4dflf2i8CQfSC87KN4aedSu0CuZ_y9mLVT5gWPq2Apf55kuBlJoSJ0q0gFcfeZZKBQO_NJJaBNkzxJwnZmjNELMqkMwtWoS9UgBxDxwRDzxuEgRxqcnNt6zoWqiXwCqaLiTRHg6vv5vT_rEwFtf-cVIRaI4X1Ja_PQhIeH0CDaqVyHq_ll8SRmQZban5BDXIq9aUBy8HXTgdR509CJUmbj0UCp5Z0jQ1iIxFCz737GeHmKP7fXOBSFSH8cwR3F_gAldisY"/>
+</div>
+<h1 class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary tracking-tight">YNote</h1>
+</div>
+<button class="material-symbols-outlined text-primary p-2 hover:bg-surface-variant/50 transition-colors active:scale-95 rounded-full" onclick="location.href='search_memories.html'">search</button>
+</header>
+<main class="mt-20 mb-28 px-container-padding-mobile md:px-container-padding-desktop max-w-5xl mx-auto space-y-8">
+<!-- Search Header Canvas -->
+<section class="space-y-6">
+<div class="relative group">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-primary">search</span>
+</div>
+<input class="w-full h-16 pl-14 pr-6 bg-surface-container-low/50 border-b-2 border-slate-700 focus:border-primary-fixed focus:ring-0 text-body-lg font-body-lg placeholder:text-on-surface-variant/50 transition-all glass-card rounded-xl" placeholder="Search your vault..." type="text" id="search-input" oninput="performSearch()"/>
+</div>
+<!-- Advanced Filters Cluster -->
+<div class="flex flex-wrap gap-3">
+<!-- Mood Filter -->
+<div class="group relative">
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-container-high rounded-full border border-outline-variant/20 hover:bg-primary-container hover:text-on-primary-container transition-all text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[18px]">filter_vintage</span>
+                        Mood
+                        <span class="material-symbols-outlined text-[16px]">expand_more</span>
+</button>
+</div>
+<!-- Date Filter -->
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-container-high rounded-full border border-outline-variant/20 hover:bg-primary-container hover:text-on-primary-container transition-all text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                    Date Range
+                </button>
+<!-- Media Type -->
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-container-high rounded-full border border-outline-variant/20 hover:bg-primary-container hover:text-on-primary-container transition-all text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[18px]">mic</span>
+                    Voice
+                </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-container-high rounded-full border border-outline-variant/20 hover:bg-primary-container hover:text-on-primary-container transition-all text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[18px]">image</span>
+                    Images
+                </button>
+</div>
+</section>
+<!-- Recent Searches Section -->
+<section class="animate-in fade-in slide-in-from-bottom-4 duration-700" id="recent-searches">
+<h2 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-4 px-1">Recent Searches</h2>
+<div class="flex flex-wrap gap-2">
+<a class="px-4 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant/10 text-on-surface hover:text-primary transition-colors flex items-center gap-2" href="#" onclick="fillSearch('Midnight reflections')">
+<span class="material-symbols-outlined text-[16px]">history</span>
+                    Midnight reflections
+                </a>
+<a class="px-4 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant/10 text-on-surface hover:text-primary transition-colors flex items-center gap-2" href="#" onclick="fillSearch('Strategy notes')">
+<span class="material-symbols-outlined text-[16px]">history</span>
+                    Strategy notes
+                </a>
+<a class="px-4 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant/10 text-on-surface hover:text-primary transition-colors flex items-center gap-2" href="#" onclick="fillSearch('Rainy days')">
+<span class="material-symbols-outlined text-[16px]">history</span>
+                    Rainy days
+                </a>
+</div>
+</section>
+<!-- Suggested Memories (Bento Grid) -->
+<section class="space-y-6" id="suggested-memories">
+<div class="flex items-center justify-between">
+<h2 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest px-1">Suggested Memories</h2>
+<button class="text-primary text-label-sm font-label-sm hover:underline" onclick="location.href='dashboard.html'">View All</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+<!-- Highlight Memory (Large) -->
+<div class="md:col-span-4 glass-card p-6 rounded-2xl flex flex-col justify-between h-80 relative overflow-hidden group cursor-pointer active:scale-[0.98] transition-transform" onclick="location.href='new_entry.html'">
+<div class="absolute inset-0 z-0 opacity-20 group-hover:opacity-40 transition-opacity">
+<img class="w-full h-full object-cover" data-alt="A soft library background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9tpt_wT_ikV8giHaVYg8Ofpo4ZCBDDlbghRnsB0r7826diHMLBjc9JR2_Sx22WUc2dZ4rVdqM_lFfwl6nhZxSjG6rERa-xM2AjecnITwyfK0XQMuvlv4ctNo3d5GKleaHVr2Ozo6aJE_XXT2CDYbWGbYNu-W89_pgivS-CxScKYj6cnOWbLhuuAXp_XIV76-6-pCs9h-qyzga_K223AA0zwrDtVoD0-KgsJsPFs8toixTJ0oVfllIlZ9j1QaPLGkSlXb3SwGLqZk"/>
+</div>
+<div class="relative z-10">
+<div class="flex items-center gap-2 mb-4">
+<span class="px-3 py-1 bg-tertiary-container/40 text-tertiary rounded-full text-meta-detail font-meta-detail">Deep Thought</span>
+<span class="text-on-surface-variant text-meta-detail font-meta-detail">October 24, 2023</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface leading-tight">The silence between words and the clarity of dawn.</h3>
+</div>
+<div class="relative z-10 flex items-center justify-between">
+<p class="text-body-md text-on-surface-variant line-clamp-2 max-w-md">I woke up today thinking about the trajectory of the last five years. There's a stillness in the house that makes every thought feel twice as heavy...</p>
+<span class="material-symbols-outlined text-primary translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all">arrow_forward</span>
+</div>
+</div>
+<!-- Secondary Memory (Medium) -->
+<div class="md:col-span-2 glass-card p-6 rounded-2xl h-80 flex flex-col justify-between group cursor-pointer active:scale-[0.98] transition-transform border-l-4 border-l-primary/30" onclick="location.href='new_entry.html'">
+<div>
+<div class="flex items-center gap-2 mb-4">
+<span class="px-3 py-1 bg-secondary-container/40 text-secondary rounded-full text-meta-detail font-meta-detail">Creative</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Digital Archive Concept</h3>
+<p class="mt-4 text-on-surface-variant text-body-md line-clamp-4">Drafting the initial thoughts for the 'Vault' architecture. Security is paramount, but the soul must remain visible...</p>
+</div>
+<div class="flex items-center gap-2 mt-4">
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">mic</span>
+<span class="text-meta-detail text-on-surface-variant">2:45 Voice Note</span>
+</div>
+</div>
+<!-- Small Grid Items -->
+<div class="md:col-span-2 glass-card p-5 rounded-2xl flex flex-col justify-between group cursor-pointer hover:bg-surface-variant/30 transition-all" onclick="location.href='new_entry.html'">
+<h3 class="font-headline-md text-[18px] text-on-surface font-semibold">Morning Coffee Ritual</h3>
+<div class="flex items-center justify-between mt-4">
+<span class="text-meta-detail text-on-surface-variant">Sept 12</span>
+<span class="material-symbols-outlined text-primary text-[20px]">wb_sunny</span>
+</div>
+</div>
+<div class="md:col-span-2 glass-card p-5 rounded-2xl flex flex-col justify-between group cursor-pointer hover:bg-surface-variant/30 transition-all" onclick="location.href='new_entry.html'">
+<h3 class="font-headline-md text-[18px] text-on-surface font-semibold">Project Nebula Launch</h3>
+<div class="flex items-center justify-between mt-4">
+<span class="text-meta-detail text-on-surface-variant">Aug 30</span>
+<span class="material-symbols-outlined text-primary text-[20px]">rocket_launch</span>
+</div>
+</div>
+<div class="md:col-span-2 glass-card p-5 rounded-2xl flex flex-col justify-between group cursor-pointer hover:bg-surface-variant/30 transition-all" onclick="location.href='new_entry.html'">
+<h3 class="font-headline-md text-[18px] text-on-surface font-semibold">Walk in the Forest</h3>
+<div class="flex items-center justify-between mt-4">
+<span class="text-meta-detail text-on-surface-variant">Aug 15</span>
+<span class="material-symbols-outlined text-primary text-[20px]">park</span>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Search Results (hidden by default) -->
+<section class="space-y-6 hidden" id="search-results-section">
+<div class="flex items-center justify-between">
+<h2 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest px-1">Search Results</h2>
+<button class="text-outline text-label-sm font-label-sm hover:underline" onclick="clearSearch()">Clear</button>
+</div>
+<div class="space-y-4" id="search-results-list">
+<!-- Dynamic Results will be injected here -->
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center pt-2 pb-6 px-4 bg-surface-container-low/90 dark:bg-surface-container-low/90 backdrop-blur-xl border-t border-outline-variant/20 shadow-lg">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all active:scale-90 duration-200" href="dashboard.html">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all active:scale-90 duration-200" href="new_entry.html">
+<span class="material-symbols-outlined">add_circle</span>
+<span class="font-label-sm text-label-sm">New Entry</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all active:scale-90 duration-200" href="analytics.html">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-sm text-label-sm">Analytics</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all active:scale-90 duration-200" href="settings.html">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</a>
+</nav>
+<script>
+        function fillSearch(val) {
+            document.getElementById('search-input').value = val;
+            performSearch();
+        }
+        function clearSearch() {
+            document.getElementById('search-input').value = '';
+            performSearch();
+        }
+        function performSearch() {
+            const query = document.getElementById('search-input').value.trim().toLowerCase();
+            const suggestions = document.getElementById('suggested-memories');
+            const recents = document.getElementById('recent-searches');
+            const resultsSection = document.getElementById('search-results-section');
+            const resultsList = document.getElementById('search-results-list');
+            
+            if (query === '') {
+                suggestions.classList.remove('hidden');
+                recents.classList.remove('hidden');
+                resultsSection.classList.add('hidden');
+                return;
+            }
+            
+            suggestions.classList.add('hidden');
+            recents.classList.add('hidden');
+            resultsSection.classList.remove('hidden');
+            
+            // Mock matching entries
+            const allMockEntries = [
+                { title: 'Morning Reflection', content: 'Woke up feeling incredibly centered. The fog over the valley was thick this morning.', date: 'Oct 11, 2024', mood: 'Calm' },
+                { title: 'The Creative Spark', content: 'Finally cracked the project structure. It feels like a massive weight has been lifted.', date: 'Oct 11, 2024', mood: 'Deep' },
+                { title: 'Midnight reflections', content: 'There is a stillness in the night that makes my thoughts echo.', date: 'Oct 24, 2023', mood: 'Thoughtful' },
+                { title: 'Strategy notes', content: 'Drafting the initial thoughts for the YNote vault secure architecture.', date: 'Sep 15, 2023', mood: 'Deep' }
+            ];
+            
+            const matches = allMockEntries.filter(e => e.title.toLowerCase().includes(query) || e.content.toLowerCase().includes(query));
+            
+            if(matches.length === 0) {
+                resultsList.innerHTML = `
+                    <div class="glass-card p-8 text-center rounded-2xl">
+                        <span class="material-symbols-outlined text-[48px] text-outline mb-4">sentiment_dissatisfied</span>
+                        <p class="font-body-md text-on-surface-variant">No matching decrypted records found in the secure log.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            resultsList.innerHTML = matches.map(e => `
+                <div class="glass-card p-6 rounded-2xl hover:border-primary/30 transition-all cursor-pointer active:scale-[0.99]" onclick="location.href='new_entry.html'">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-display-lg-mobile text-primary text-display-lg-mobile">${e.title}</h4>
+                        <span class="font-meta-detail text-meta-detail text-on-surface-variant">${e.date}</span>
+                    </div>
+                    <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-4">${e.content}</p>
+                    <span class="px-3 py-1 bg-primary-container/30 text-primary text-label-sm font-label-sm rounded-full">${e.mood}</span>
+                </div>
+            `).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('focus', () => {
+                searchInput.parentElement.classList.add('glow-soft');
+            });
+            searchInput.addEventListener('blur', () => {
+                searchInput.parentElement.classList.remove('glow-soft');
+            });
+        });
+    </script>
+</body></html>

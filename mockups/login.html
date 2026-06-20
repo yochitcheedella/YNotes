@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>YNote | Secure Vault</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        cyberBlue: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6', // Main accent
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                            950: '#172554',
+                        },
+                        bgDark: '#030712', // Very dark slate-black
+                        surfaceDark: '#090f1e', // Slate-dark card background
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Premium Background Gradients and Glows */
+        .ambient-glow-1 {
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, rgba(3, 7, 18, 0) 65%);
+            animation: pulse-glow-1 12s ease-in-out infinite alternate;
+        }
+        .ambient-glow-2 {
+            background: radial-gradient(circle, rgba(96, 165, 250, 0.08) 0%, rgba(3, 7, 18, 0) 60%);
+            animation: pulse-glow-2 15s ease-in-out infinite alternate-reverse;
+        }
+        
+        @keyframes pulse-glow-1 {
+            0% { transform: translate(-10%, -10%) scale(1); }
+            100% { transform: translate(15%, 20%) scale(1.2); }
+        }
+        @keyframes pulse-glow-2 {
+            0% { transform: translate(10%, 15%) scale(1.1); }
+            100% { transform: translate(-20%, -15%) scale(0.9); }
+        }
+
+        /* Glassmorphism Styles */
+        .glass-card {
+            background: rgba(9, 15, 30, 0.65);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .interactive-glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: 0;
+        }
+        .glass-card:hover .interactive-glow {
+            opacity: 1;
+        }
+
+        /* Custom Form Inputs */
+        .cyber-input {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .cyber-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        /* Scan Line Animation */
+        .scanline {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+            box-shadow: 0 0 8px #3b82f6;
+            animation: scanning 2s linear infinite;
+        }
+        @keyframes scanning {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        /* Shake Animation for Invalid State */
+        .shake {
+            animation: shake-anim 0.4s ease-in-out;
+        }
+        @keyframes shake-anim {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        /* Brand Title Shimmer Effect */
+        .shimmer-text {
+            background: linear-gradient(90deg, #60a5fa 0%, #ffffff 50%, #60a5fa 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 5s linear infinite;
+        }
+        @keyframes shimmer {
+            to { background-position: 200% center; }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030712;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.3);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(59, 130, 246, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-bgDark text-blue-100 font-sans min-h-screen flex flex-col justify-between overflow-x-hidden relative selection:bg-cyberBlue-900 selection:text-cyberBlue-100">
+    
+    <!-- Background Ambient Glow Objects -->
+    <div class="fixed inset-0 z-0 pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] ambient-glow-1 rounded-full"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] ambient-glow-2 rounded-full"></div>
+        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.003)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.003)_1px,transparent_1px)] bg-[size:30px_30px] opacity-25"></div>
+    </div>
+
+    <!-- Top Spacer for alignment -->
+    <div class="h-8"></div>
+
+    <!-- Main Workspace Container -->
+    <main class="relative z-10 w-full max-w-[480px] mx-auto px-4 my-auto">
+        
+        <!-- YNote Header Branding -->
+        <header class="text-center mb-8 flex flex-col items-center">
+            <div class="w-16 h-16 rounded-2xl bg-cyberBlue-950/60 border border-cyberBlue-500/25 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(59,130,246,0.15)]">
+                <span class="material-symbols-outlined text-[36px] text-cyberBlue-400 font-light" style="font-variation-settings: 'FILL' 0;">lock</span>
+            </div>
+            <h1 class="text-4xl font-bold tracking-tight text-white mb-2 font-sans select-none">
+                <span class="shimmer-text">YNote</span>
+            </h1>
+            <p class="text-sm font-mono text-cyberBlue-400 uppercase tracking-[0.25em] text-xs">
+                Your Notes. Your Privacy. 🔐
+            </p>
+        </header>
+
+        <!-- Authentication Container Panel -->
+        <div class="glass-card rounded-3xl p-8 md:p-10 shadow-2xl relative overflow-hidden transition-all duration-500" id="auth-panel">
+            <!-- Dynamic cursor hover spotlight -->
+            <div class="interactive-glow" id="hover-spotlight"></div>
+            
+            <!-- FORM CARD 1: LOGIN (ACTIVE BY DEFAULT) -->
+            <div class="relative z-10" id="login-container">
+                <div class="flex flex-col mb-6">
+                    <h2 class="text-2xl font-semibold text-white tracking-wide">Unlock Vault</h2>
+                    <p class="text-sm text-blue-300/60 mt-1">Provide credential keys to decrypt your digital journal.</p>
+                </div>
+
+                <!-- Error Notice Box -->
+                <div class="hidden mb-6 p-4 rounded-xl border border-red-500/30 bg-red-950/20 text-red-400 text-sm flex gap-3 items-start animate-fade-in" id="error-alert" role="alert">
+                    <span class="material-symbols-outlined text-[18px] shrink-0 mt-0.5" style="font-variation-settings: 'FILL' 1;">error</span>
+                    <span id="error-message">Access keys rejected. Check credentials and retry.</span>
+                </div>
+
+                <form class="space-y-5" id="login-form" novalidate onsubmit="handleLogin(event)">
+                    <!-- Email / Username field -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-mono text-cyberBlue-300 uppercase tracking-widest" for="email-or-username">Email / Username</label>
+                        <div class="relative flex items-center">
+                            <span class="material-symbols-outlined absolute left-4 text-[20px] text-blue-400/50" style="font-variation-settings: 'FILL' 0;">alternate_email</span>
+                            <input class="w-full pl-12 pr-4 py-3.5 rounded-xl text-white font-sans placeholder:text-blue-200/20 cyber-input outline-none focus:ring-0 text-sm" 
+                                   id="email-or-username" 
+                                   placeholder="e.g. secure@ynote.io" 
+                                   required 
+                                   tabindex="1"
+                                   type="text"/>
+                        </div>
+                    </div>
+
+                    <!-- Password field -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="block text-xs font-mono text-cyberBlue-300 uppercase tracking-widest" for="password">Master Password</label>
+                            <a class="text-xs font-mono text-cyberBlue-400 hover:text-white hover:underline transition-colors focus:outline-none focus:ring-1 focus:ring-cyberBlue-500 rounded px-1" 
+                               href="#" 
+                               onclick="showForgotPassword(event)"
+                               tabindex="5">
+                                Forgot password?
+                            </a>
+                        </div>
+                        <div class="relative flex items-center">
+                            <span class="material-symbols-outlined absolute left-4 text-[20px] text-blue-400/50" style="font-variation-settings: 'FILL' 1;">lock</span>
+                            <input class="w-full pl-12 pr-12 py-3.5 rounded-xl text-white font-sans placeholder:text-blue-200/20 cyber-input outline-none focus:ring-0 text-sm" 
+                                   id="password" 
+                                   placeholder="Enter Decryption Key" 
+                                   required 
+                                   tabindex="2"
+                                   type="password"/>
+                            <button class="absolute right-4 text-blue-400/50 hover:text-white transition-colors focus:outline-none" 
+                                    onclick="togglePasswordVisibility('password', 'eye-icon-login')" 
+                                    tabindex="3"
+                                    type="button">
+                                <span class="material-symbols-outlined text-[20px]" id="eye-icon-login">visibility</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Remember me option -->
+                    <div class="flex items-center">
+                        <input class="w-4.5 h-4.5 rounded bg-slate-900 border-blue-400/20 text-cyberBlue-600 focus:ring-0 focus:ring-offset-0 cursor-pointer" 
+                               id="remember-me" 
+                               tabindex="4"
+                               type="checkbox"/>
+                        <label class="ml-2.5 text-xs text-blue-200/50 select-none cursor-pointer hover:text-blue-100 transition-colors" for="remember-me">
+                            Keep keys cached on this device (Remember Me)
+                        </label>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="space-y-3 pt-2">
+                        <button class="w-full py-4 bg-cyberBlue-600 hover:bg-cyberBlue-500 text-white font-semibold text-xs uppercase tracking-[0.15em] rounded-xl hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-cyberBlue-500" 
+                                id="login-submit-btn"
+                                tabindex="6"
+                                type="submit">
+                            <span>Unlock Vault</span>
+                            <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">key</span>
+                        </button>
+
+                        <!-- Biometrics Button -->
+                        <button class="w-full py-3.5 bg-cyberBlue-950/40 hover:bg-cyberBlue-900/40 border border-cyberBlue-500/20 text-cyberBlue-400 hover:text-cyberBlue-300 font-semibold text-xs uppercase tracking-[0.15em] rounded-xl active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2.5 focus:outline-none focus:ring-2 focus:ring-cyberBlue-500" 
+                                id="biometric-btn"
+                                onclick="triggerBiometric()"
+                                tabindex="7"
+                                type="button">
+                            <span class="material-symbols-outlined text-[18px]">fingerprint</span>
+                            <span>Verify Biometrics</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Create Account Link -->
+                <div class="mt-8 text-center border-t border-slate-800/60 pt-6">
+                    <p class="text-xs text-blue-200/40">
+                        First time setting up your secure diary?
+                        <a class="text-cyberBlue-400 hover:text-white font-semibold ml-1.5 focus:outline-none hover:underline" 
+                           href="#" 
+                           onclick="toggleAuthMode(event, 'register')"
+                           tabindex="8">
+                            Initialize New Account
+                        </a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- FORM CARD 2: REGISTER (HIDDEN BY DEFAULT) -->
+            <div class="relative z-10 hidden" id="register-container">
+                <div class="flex flex-col mb-6">
+                    <h2 class="text-2xl font-semibold text-white tracking-wide">Initialize Vault</h2>
+                    <p class="text-sm text-blue-300/60 mt-1">Deploy keys to protect your encrypted diary.</p>
+                </div>
+
+                <form class="space-y-4" id="register-form" novalidate onsubmit="handleRegister(event)">
+                    <!-- Email field -->
+                    <div class="space-y-1">
+                        <label class="block text-xs font-mono text-cyberBlue-300 uppercase tracking-widest" for="reg-email">Email Address</label>
+                        <div class="relative flex items-center">
+                            <span class="material-symbols-outlined absolute left-4 text-[20px] text-blue-400/50">mail</span>
+                            <input class="w-full pl-12 pr-4 py-3 rounded-xl text-white font-sans placeholder:text-blue-200/20 cyber-input outline-none focus:ring-0 text-sm" 
+                                   id="reg-email" 
+                                   placeholder="secure@ynote.io" 
+                                   required 
+                                   type="email"/>
+                        </div>
+                    </div>
+
+                    <!-- Username field -->
+                    <div class="space-y-1">
+                        <label class="block text-xs font-mono text-cyberBlue-300 uppercase tracking-widest" for="reg-username">Username</label>
+                        <div class="relative flex items-center">
+                            <span class="material-symbols-outlined absolute left-4 text-[20px] text-blue-400/50">person</span>
+                            <input class="w-full pl-12 pr-4 py-3 rounded-xl text-white font-sans placeholder:text-blue-200/20 cyber-input outline-none focus:ring-0 text-sm" 
+                                   id="reg-username" 
+                                   placeholder="secure_user" 
+                                   required 
+                                   type="text"/>
+                        </div>
+                    </div>
+
+                    <!-- Master Password field -->
+                    <div class="space-y-1">
+                        <label class="block text-xs font-mono text-cyberBlue-300 uppercase tracking-widest" for="reg-password">Master Password</label>
+                        <div class="relative flex items-center">
+                            <span class="material-symbols-outlined absolute left-4 text-[20px] text-blue-400/50" style="font-variation-settings: 'FILL' 1;">lock</span>
+                            <input class="w-full pl-12 pr-12 py-3 rounded-xl text-white font-sans placeholder:text-blue-200/20 cyber-input outline-none focus:ring-0 text-sm" 
+                                   id="reg-password" 
+                                   placeholder="Min 8 chars, 1 uppercase, 1 digit" 
+                                   required 
+                                   type="password"/>
+                            <button class="absolute right-4 text-blue-400/50 hover:text-white transition-colors focus:outline-none" 
+                                    onclick="togglePasswordVisibility('reg-password', 'eye-icon-reg')" 
+                                    type="button">
+                                <span class="material-symbols-outlined text-[20px]" id="eye-icon-reg">visibility</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Confirm Password field -->
+                    <div class="space-y-1">
+                        <label class="block text-xs font-mono text-cyberBlue-300 uppercase tracking-widest" for="reg-confirm-password">Confirm Password</label>
+                        <div class="relative flex items-center">
+                            <span class="material-symbols-outlined absolute left-4 text-[20px] text-blue-400/50" style="font-variation-settings: 'FILL' 1;">lock_reset</span>
+                            <input class="w-full pl-12 pr-4 py-3 rounded-xl text-white font-sans placeholder:text-blue-200/20 cyber-input outline-none focus:ring-0 text-sm" 
+                                   id="reg-confirm-password" 
+                                   placeholder="Verify Decryption Key" 
+                                   required 
+                                   type="password"/>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="pt-3">
+                        <button class="w-full py-4 bg-cyberBlue-600 hover:bg-cyberBlue-500 text-white font-semibold text-xs uppercase tracking-[0.15em] rounded-xl hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-cyberBlue-500" 
+                                id="register-submit-btn"
+                                type="submit">
+                            <span>Register & Generate Keys</span>
+                            <span class="material-symbols-outlined text-[16px]">vpn_key</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Back to Login Link -->
+                <div class="mt-6 text-center border-t border-slate-800/60 pt-4">
+                    <p class="text-xs text-blue-200/40">
+                        Already have initialized keys?
+                        <a class="text-cyberBlue-400 hover:text-white font-semibold ml-1.5 focus:outline-none hover:underline" 
+                           href="#" 
+                           onclick="toggleAuthMode(event, 'login')">
+                            Unlock Existing Vault
+                        </a>
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Biometric Overlay Scanner Screen -->
+            <div class="absolute inset-0 bg-slate-950/95 z-30 hidden flex flex-col items-center justify-center p-8 transition-opacity duration-300" id="biometric-overlay">
+                <div class="relative w-32 h-32 flex items-center justify-center rounded-full border border-cyberBlue-500/20 bg-cyberBlue-950/20 mb-6">
+                    <span class="material-symbols-outlined text-[72px] text-cyberBlue-400" id="fingerprint-icon">fingerprint</span>
+                    <!-- Scanner Laser Beam Line -->
+                    <div class="scanline absolute w-[80%] left-[10%] hidden" id="overlay-scanline"></div>
+                </div>
+                
+                <h3 class="text-lg font-semibold text-white mb-2" id="bio-title">Biometric Authentication</h3>
+                <p class="text-sm text-blue-300/60 text-center max-w-[280px]" id="bio-desc">Place registered finger on sensor to decrypt local database keys.</p>
+                
+                <button class="mt-8 px-5 py-2 bg-slate-800 hover:bg-slate-700 text-blue-200 text-xs font-mono uppercase tracking-widest rounded-lg focus:outline-none border border-slate-700 transition-colors" 
+                        onclick="cancelBiometric()">
+                    Cancel Verification
+                </button>
+            </div>
+        </div>
+
+        <!-- Security and Encryption Trust Footer -->
+        <footer class="mt-8 flex items-center justify-center gap-2 text-blue-200/30 select-none">
+            <span class="material-symbols-outlined text-[14px]">encrypted</span>
+            <span class="font-mono text-[10px] uppercase tracking-widest">End-to-End Local AES-256 Architecture</span>
+        </footer>
+    </main>
+
+    <!-- Global Bottom Padding Spacer -->
+    <div class="h-8"></div>
+
+    <!-- UI Interaction Scripts -->
+    <script>
+        // Spotlight Glow cursor follow
+        const card = document.getElementById('auth-panel');
+        const spotlight = document.getElementById('hover-spotlight');
+
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            spotlight.style.left = `${x}px`;
+            spotlight.style.top = `${y}px`;
+        });
+
+        // Toggle visibility between Login and Registration forms
+        function toggleAuthMode(event, mode) {
+            if (event) event.preventDefault();
+            
+            const login = document.getElementById('login-container');
+            const register = document.getElementById('register-container');
+            const errorBox = document.getElementById('error-alert');
+            
+            // Hide error state during transition
+            errorBox.classList.add('hidden');
+            
+            if (mode === 'register') {
+                login.classList.add('hidden');
+                register.classList.remove('hidden');
+            } else {
+                register.classList.add('hidden');
+                login.classList.remove('hidden');
+            }
+        }
+
+        // Toggle password show/hide status
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            
+            if (input.type === "password") {
+                input.type = "text";
+                icon.textContent = "visibility_off";
+            } else {
+                input.type = "password";
+                icon.textContent = "visibility";
+            }
+        }
+
+        // Biometrics Login Flow simulation
+        let bioTimeout = null;
+        
+        function triggerBiometric() {
+            const overlay = document.getElementById('biometric-overlay');
+            const scanline = document.getElementById('overlay-scanline');
+            const title = document.getElementById('bio-title');
+            const desc = document.getElementById('bio-desc');
+            const fingerprint = document.getElementById('fingerprint-icon');
+            
+            overlay.classList.remove('hidden');
+            scanline.classList.remove('hidden');
+            
+            title.textContent = "Scanning Biometric Key...";
+            desc.textContent = "Hold finger on the sensor. Validating SHA-256 fingerprint signature.";
+            fingerprint.className = "material-symbols-outlined text-[72px] text-cyberBlue-400 animate-pulse";
+            
+            // Simulate fingerprint scan completion
+            bioTimeout = setTimeout(() => {
+                scanline.classList.add('hidden');
+                fingerprint.className = "material-symbols-outlined text-[72px] text-emerald-400";
+                title.textContent = "Access Key Verified";
+                desc.textContent = "Initializing secure database connections. Decrypting diaries...";
+                
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+            }, 2500);
+        }
+
+        function cancelBiometric() {
+            if (bioTimeout) clearTimeout(bioTimeout);
+            const overlay = document.getElementById('biometric-overlay');
+            overlay.classList.add('hidden');
+        }
+
+        // Validate login credentials and simulate submit
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            const emailInput = document.getElementById('email-or-username');
+            const passInput = document.getElementById('password');
+            const errorBox = document.getElementById('error-alert');
+            const errorMessage = document.getElementById('error-message');
+            const cardEl = document.getElementById('auth-panel');
+            const btn = document.getElementById('login-submit-btn');
+
+            // Reset UI state
+            errorBox.classList.add('hidden');
+            cardEl.classList.remove('shake');
+
+            // 1. Basic Form Validation
+            if (!emailInput.value.trim()) {
+                showError("Email or Username is required to fetch decryption keys.");
+                return;
+            }
+            if (!passInput.value) {
+                showError("Master Password is required to decrypt entries.");
+                return;
+            }
+
+            // 2. Loading State Initialization
+            const originalContent = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Decrypting Vault...</span>
+                </div>
+            `;
+
+            // 3. Simulated API/Cryptographic Verification
+            setTimeout(() => {
+                const emailVal = emailInput.value.trim().toLowerCase();
+                const passVal = passInput.value;
+
+                // Support both decoy passcodes and real credentials for mockups validation
+                if (passVal === 'Wrong@123') {
+                    // Fail state simulation
+                    btn.innerHTML = originalContent;
+                    btn.disabled = false;
+                    showError("Decryption failed. Incorrect master password, invalid hash signature.");
+                } else {
+                    // Success state simulation
+                    btn.className = "w-full py-4 bg-emerald-600 text-white font-semibold text-xs uppercase tracking-[0.15em] rounded-xl flex items-center justify-center gap-2";
+                    btn.innerHTML = `
+                        <span class="material-symbols-outlined text-[16px]">verified</span>
+                        <span>Decryption Completed</span>
+                    `;
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 800);
+                }
+            }, 1800);
+
+            function showError(msg) {
+                errorMessage.textContent = msg;
+                errorBox.classList.remove('hidden');
+                // Shake the card to draw focus to failure
+                cardEl.classList.add('shake');
+                setTimeout(() => cardEl.classList.remove('shake'), 400);
+            }
+        }
+
+        // Validate and handle new user setup
+        function handleRegister(e) {
+            e.preventDefault();
+            
+            const emailInput = document.getElementById('reg-email').value.trim();
+            const usernameInput = document.getElementById('reg-username').value.trim();
+            const passInput = document.getElementById('reg-password').value;
+            const confirmInput = document.getElementById('reg-confirm-password').value;
+            const btn = document.getElementById('register-submit-btn');
+
+            // Regex checks (aligned with InputValidator backend rules)
+            const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (!emailRegex.test(emailInput)) {
+                alert("Please provide a valid email format.");
+                return;
+            }
+            if (usernameInput.length < 3) {
+                alert("Username must be at least 3 characters.");
+                return;
+            }
+            if (!passwordRegex.test(passInput)) {
+                alert("Master Password must be at least 8 characters, contain one uppercase letter and one digit.");
+                return;
+            }
+            if (passInput !== confirmInput) {
+                alert("Confirmation password does not match Master Password.");
+                return;
+            }
+
+            // Simulated Key Generation & Registration Loading State
+            const originalContent = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Generating RSA Keys...</span>
+                </div>
+            `;
+
+            setTimeout(() => {
+                alert("Account created. Local encrypted database initialized successfully! Redirecting...");
+                window.location.href = 'dashboard.html';
+            }, 2000);
+        }
+
+        // Forgot password simulation
+        function showForgotPassword(e) {
+            e.preventDefault();
+            alert("To recover access, input the 14-character Recovery Key (format: YN-XXXX-XXXX-XXXX) on the device application screen.");
+        }
+    </script>
+</body>
+</html>

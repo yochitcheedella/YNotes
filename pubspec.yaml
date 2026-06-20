@@ -1,0 +1,60 @@
+name: ynote
+description: "YNote - Secure Personal Diary and Journal Application"
+publish_to: 'none'
+
+version: 1.0.0+2
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  provider: ^6.1.2
+
+  # Databases and Storage
+  sqflite: ^2.3.3
+  path_provider: ^2.1.3
+  flutter_secure_storage: ^9.2.2
+
+  # Security and Cryptography
+  encrypt: ^5.0.3
+  crypto: ^3.0.3
+  local_auth: ^2.2.0
+
+  # Firebase Integration
+  firebase_core: ^3.1.1
+  firebase_auth: ^5.1.1
+  cloud_firestore: ^5.0.1
+  firebase_storage: ^12.0.1
+
+  # Utilities, Preferences and Date Parsing
+  intl: ^0.19.0
+  shared_preferences: ^2.2.3
+
+  # Charts and Analytics
+  fl_chart: ^0.68.0
+
+  # Media Attachments and Audio Recording
+  image_picker: ^1.1.2
+  file_picker: ^8.0.3
+  record: ^5.1.2
+  audioplayers: ^6.0.0
+
+  # Material Design Icons and Cupertino
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Ensure assets are declared for dummy data, icons, or default media
+  assets:
+    - assets/images/
+    - assets/audio/
