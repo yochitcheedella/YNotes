@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient';
 import { deriveKey, generateRecoveryKey } from '../cryptoHelper';
 import { useBiometric } from '../hooks/useBiometric';
+import { Capacitor } from '@capacitor/core';
 
 export default function Login({ onAuthSuccess, initialMessage, clearInitialMessage }) {
   // Modes: 'login' or 'register'
@@ -144,7 +145,9 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
       // 3. Cache master password in LocalStorage and Keystore/Keychain if rememberMe is enabled
       if (rememberMe) {
         localStorage.setItem('ynote_remembered_email', emailOrUsername);
-        localStorage.setItem('ynote_cached_password', password);
+        if (!Capacitor.isNativePlatform()) {
+          localStorage.setItem('ynote_cached_password', password);
+        }
         await saveCredentials(loginEmail, password);
       } else {
         localStorage.removeItem('ynote_remembered_email');
