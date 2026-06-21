@@ -2,6 +2,7 @@
   "name": "diaro",
   "private": true,
   "version": "1.0.9",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",
