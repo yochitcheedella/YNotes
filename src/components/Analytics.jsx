@@ -47,7 +47,7 @@ export default function Analytics({ notes, onNavigate }) {
       {/* Header */}
       <div>
         <h2 className="text-xl font-semibold text-white tracking-wide">Mood Analytics & Insights</h2>
-        <p className="text-xs text-purple-300/40 mt-1">AI-driven emotional diagnostics processed entirely in offline sandbox env.</p>
+        <p className="text-xs text-diaroAccent-300/40 mt-1">AI-driven emotional diagnostics processed entirely in offline sandbox env.</p>
       </div>
 
       {/* Overview Grid */}
@@ -55,8 +55,8 @@ export default function Analytics({ notes, onNavigate }) {
         {/* Metric 1 */}
         <div className="glass-card rounded-xl p-5 flex flex-col justify-between h-36">
           <div className="flex justify-between items-start">
-            <span className="text-xs font-mono text-ynoteAccent-300 uppercase tracking-widest">Total Memories</span>
-            <span className="material-symbols-outlined text-ynoteAccent-400">history</span>
+            <span className="text-xs font-mono text-diaroAccent-300 uppercase tracking-widest">Total Memories</span>
+            <span className="material-symbols-outlined text-diaroAccent-400">history</span>
           </div>
           <div>
             <p className="text-3xl font-bold text-white font-sans">{totalNotes}</p>
@@ -67,19 +67,19 @@ export default function Analytics({ notes, onNavigate }) {
         {/* Metric 2 */}
         <div className="glass-card rounded-xl p-5 flex flex-col justify-between h-36">
           <div className="flex justify-between items-start">
-            <span className="text-xs font-mono text-ynoteAccent-300 uppercase tracking-widest">Dominant Mood</span>
-            <span className="material-symbols-outlined text-ynoteAccent-400">mood</span>
+            <span className="text-xs font-mono text-diaroAccent-300 uppercase tracking-widest">Dominant Mood</span>
+            <span className="material-symbols-outlined text-diaroAccent-400">mood</span>
           </div>
           <div>
             <p className="text-3xl font-bold text-white capitalize font-sans">{dominantMood}</p>
-            <p className="text-[10px] text-purple-300/40 font-mono mt-1">Based on text analysis</p>
+            <p className="text-[10px] text-diaroAccent-300/40 font-mono mt-1">Based on text analysis</p>
           </div>
         </div>
 
         {/* Metric 3 */}
         <div className="glass-card rounded-xl p-5 flex flex-col justify-between h-36">
           <div className="flex justify-between items-start">
-            <span className="text-xs font-mono text-ynoteAccent-300 uppercase tracking-widest">Security Health</span>
+            <span className="text-xs font-mono text-diaroAccent-300 uppercase tracking-widest">Security Health</span>
             <span className="material-symbols-outlined text-emerald-400">verified_user</span>
           </div>
           <div>
@@ -96,7 +96,7 @@ export default function Analytics({ notes, onNavigate }) {
         <div className="space-y-4">
           {/* Happy */}
           <div className="space-y-1">
-            <div className="flex justify-between text-xs font-mono text-purple-300/70">
+            <div className="flex justify-between text-xs font-mono text-diaroAccent-300/70">
               <span>😊 Happy / Calm</span>
               <span>{moodCounts.happy} ({getPercent(moodCounts.happy)})</span>
             </div>
@@ -107,7 +107,7 @@ export default function Analytics({ notes, onNavigate }) {
 
           {/* Excited */}
           <div className="space-y-1">
-            <div className="flex justify-between text-xs font-mono text-purple-300/70">
+            <div className="flex justify-between text-xs font-mono text-diaroAccent-300/70">
               <span>😍 Excited / Energetic</span>
               <span>{moodCounts.excited} ({getPercent(moodCounts.excited)})</span>
             </div>
@@ -118,7 +118,7 @@ export default function Analytics({ notes, onNavigate }) {
 
           {/* Neutral */}
           <div className="space-y-1">
-            <div className="flex justify-between text-xs font-mono text-purple-300/70">
+            <div className="flex justify-between text-xs font-mono text-diaroAccent-300/70">
               <span>😐 Neutral / Balanced</span>
               <span>{moodCounts.neutral} ({getPercent(moodCounts.neutral)})</span>
             </div>
@@ -129,7 +129,7 @@ export default function Analytics({ notes, onNavigate }) {
 
           {/* Sad */}
           <div className="space-y-1">
-            <div className="flex justify-between text-xs font-mono text-purple-300/70">
+            <div className="flex justify-between text-xs font-mono text-diaroAccent-300/70">
               <span>😔 Sad / Reflective</span>
               <span>{moodCounts.sad} ({getPercent(moodCounts.sad)})</span>
             </div>
@@ -140,7 +140,7 @@ export default function Analytics({ notes, onNavigate }) {
 
           {/* Angry */}
           <div className="space-y-1">
-            <div className="flex justify-between text-xs font-mono text-purple-300/70">
+            <div className="flex justify-between text-xs font-mono text-diaroAccent-300/70">
               <span>😡 Angry / Stressed</span>
               <span>{moodCounts.angry} ({getPercent(moodCounts.angry)})</span>
             </div>
@@ -155,10 +155,10 @@ export default function Analytics({ notes, onNavigate }) {
       <section className="glass-card rounded-xl p-6 space-y-4">
         <div className="flex justify-between items-center">
           <h3 className="text-sm font-semibold text-white/80">Reflection Nuggets</h3>
-          <span className="text-[10px] font-mono text-ynoteAccent-400 uppercase tracking-widest">Cognitive Advisor</span>
+          <span className="text-[10px] font-mono text-diaroAccent-400 uppercase tracking-widest">Cognitive Advisor</span>
         </div>
 
-        <div className="p-4 rounded-xl border border-purple-500/10 bg-slate-950/40 text-sm text-purple-100/70 space-y-3 leading-relaxed">
+        <div className="p-4 rounded-xl border border-diaroAccent-500/10 bg-slate-950/40 text-sm text-diaroAccent-100/70 space-y-3 leading-relaxed">
           <p>
             🧠 <strong>Observation:</strong> You have recorded a high density of <strong>Reflective / Calm</strong> entries in the past weeks. Silence and stillness appear to trigger your creative flow notes.
           </p>
@@ -169,7 +169,7 @@ export default function Analytics({ notes, onNavigate }) {
 
         <button 
           onClick={() => onNavigate('settings')}
-          className="w-full py-3 bg-ynoteAccent-950/40 hover:bg-ynoteAccent-900/40 border border-ynoteAccent-500/20 text-ynoteAccent-400 hover:text-ynoteAccent-300 font-semibold text-xs uppercase tracking-[0.15em] rounded-xl active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
+          className="w-full py-3 bg-diaroAccent-950/40 hover:bg-diaroAccent-900/40 border border-diaroAccent-500/20 text-diaroAccent-400 hover:text-diaroAccent-300 font-semibold text-xs uppercase tracking-[0.15em] rounded-xl active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
         >
           <span className="material-symbols-outlined text-[16px]">verified_user</span>
           <span>Run Vault Security Check</span>

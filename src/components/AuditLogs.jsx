@@ -35,22 +35,22 @@ export default function AuditLogs({ onCancel }) {
         <div className="flex justify-between items-center">
           <button 
             onClick={onCancel}
-            className="flex items-center gap-1.5 text-purple-300/60 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 text-diaroAccent-300/60 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
             <span className="text-xs uppercase font-mono tracking-wider">Back</span>
           </button>
           
           <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-            <span className="material-symbols-outlined text-ynoteAccent-400">security</span>
+            <span className="material-symbols-outlined text-diaroAccent-400">security</span>
             Security Audit Logs
           </h2>
           <div className="w-16" />
         </div>
 
-        <div className="bg-[#050505] rounded-xl border border-purple-900/30 overflow-hidden">
+        <div className="bg-[#050505] rounded-xl border border-diaroAccent-900/30 overflow-hidden">
           {isLoading ? (
-            <div className="p-8 text-center text-purple-400/50 font-mono text-sm animate-pulse">Scanning security logs...</div>
+            <div className="p-8 text-center text-diaroAccent-400/50 font-mono text-sm animate-pulse">Scanning security logs...</div>
           ) : logs.length === 0 ? (
             <div className="p-8 text-center text-gray-500 font-mono text-sm">No security events found.</div>
           ) : (
@@ -59,11 +59,11 @@ export default function AuditLogs({ onCancel }) {
                 <li key={log.id} className="p-4 hover:bg-white/5 transition-colors flex items-start justify-between">
                   <div className="space-y-1">
                     <p className="text-white text-sm font-semibold capitalize">{log.action.replace(/_/g, ' ')}</p>
-                    <p className="text-xs text-purple-300/60 font-mono">{log.device_info}</p>
+                    <p className="text-xs text-diaroAccent-300/60 font-mono">{log.device_info}</p>
                     {log.ip_address && <p className="text-[10px] text-gray-500 font-mono">IP: {log.ip_address}</p>}
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-purple-400 font-mono">
+                    <p className="text-xs text-diaroAccent-400 font-mono">
                       {new Date(log.created_at).toLocaleDateString()}
                     </p>
                     <p className="text-[10px] text-gray-500 font-mono">

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient';
-import { deriveKey, generateRecoveryKey } from '../cryptoHelper';
+import { deriveKey, generateRecoveryKey, hashPassword } from '../cryptoHelper';
 import { useBiometric } from '../hooks/useBiometric';
 import { Capacitor } from '@capacitor/core';
+import { Preferences } from '@capacitor/preferences';
 
 export default function Login({ onAuthSuccess, initialMessage, clearInitialMessage }) {
   // Modes: 'login' or 'register'
@@ -75,7 +76,7 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
 
   // Pre-load credentials if rememberMe was active
   useEffect(() => {
-    const rememberedUser = localStorage.getItem('ynote_remembered_email');
+    const rememberedUser = localStorage.getItem('diaro_remembered_email');
     if (rememberedUser) {
       setEmailOrUsername(rememberedUser);
       setRememberMe(true);
@@ -115,7 +116,7 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
       // 1. Resolve email address if username was entered
       let loginEmail = emailOrUsername.trim();
       if (!loginEmail.includes('@')) {
-        loginEmail = `${loginEmail.toLowerCase()}@ynote.app`;
+        loginEmail = `${loginEmail.toLowerCase()}@diaro.app`;
       }
 
       // 2. Authenticate with Supabase Auth
@@ -125,18 +126,44 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
       });
 
       if (error) {
-        // Fallback: If it's the mock/placeholder project, let's allow bypass for testing!
-        if (supabase.supabaseUrl && supabase.supabaseUrl.includes('your-project')) {
-          console.warn('Supabase using placeholder. Falling back to offline sandbox session.');
-          const derivedVaultKey = deriveKey(password);
-          onAuthSuccess({
-            user: { email: loginEmail, user_metadata: { username: emailOrUsername } },
-            vaultKey: derivedVaultKey,
-            isDecoy: false,
-          });
-          return;
+        const isPlaceholder = supabase.supabaseUrl && supabase.supabaseUrl.includes('your-project');
+        const isRateLimit = error.message && error.message.toLowerCase().includes('rate limit') || error.status === 429;
+        const isNetworkError = !navigator.onLine || error.message?.includes('fetch') || error.message?.includes('NetworkError') || error.status === 0 || error.message?.includes('Load failed');
+
+        if (isPlaceholder || isRateLimit || isNetworkError) {
+          const savedHash = localStorage.getItem('diaro_vault_password_hash');
+          const savedEmail = localStorage.getItem('diaro_vault_email');
+          
+          if (savedHash && savedEmail && savedEmail.toLowerCase() === loginEmail.toLowerCase()) {
+            const enteredHash = hashPassword(password);
+            if (enteredHash === savedHash) {
+              console.warn('Supabase sync failed (offline/rate limit). Logging in with local cache.');
+              const derivedVaultKey = deriveKey(password);
+              
+              if (rememberMe) {
+                await Preferences.set({ key: 'diaro_remembered_email', value: emailOrUsername });
+                await Preferences.set({ key: 'diaro_cached_password', value: password });
+              }
+              
+              onAuthSuccess({
+                user: { email: loginEmail, user_metadata: { username: emailOrUsername } },
+                vaultKey: derivedVaultKey,
+                isDecoy: false,
+              });
+              return;
+            }
+          }
+          
+          if (isRateLimit) {
+            setErrorMsg('Too many login attempts. Please try again in a few minutes.');
+          } else if (isNetworkError) {
+            setErrorMsg('Network connection error. Check your internet connection.');
+          } else {
+            setErrorMsg('Decryption failed. Incorrect master password or invalid credentials.');
+          }
+        } else {
+          setErrorMsg('Decryption failed. Incorrect master password or invalid credentials.');
         }
-        setErrorMsg('Decryption failed. Incorrect master password or invalid credentials.');
         triggerShake();
         setIsLoading(false);
         return;
@@ -144,16 +171,25 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
 
       // 3. Cache master password in LocalStorage and Keystore/Keychain if rememberMe is enabled
       if (rememberMe) {
-        localStorage.setItem('ynote_remembered_email', emailOrUsername);
+        localStorage.setItem('diaro_remembered_email', emailOrUsername);
         if (!Capacitor.isNativePlatform()) {
-          localStorage.setItem('ynote_cached_password', password);
+          localStorage.setItem('diaro_cached_password', password);
         }
+        await Preferences.set({ key: 'diaro_remembered_email', value: emailOrUsername });
+        await Preferences.set({ key: 'diaro_cached_password', value: password });
         await saveCredentials(loginEmail, password);
       } else {
-        localStorage.removeItem('ynote_remembered_email');
-        localStorage.removeItem('ynote_cached_password');
+        localStorage.removeItem('diaro_remembered_email');
+        localStorage.removeItem('diaro_cached_password');
+        await Preferences.remove({ key: 'diaro_remembered_email' });
+        await Preferences.remove({ key: 'diaro_cached_password' });
         await deleteCredentials();
       }
+
+      // Always save password hash locally for offline login validation
+      const passwordHash = hashPassword(password);
+      localStorage.setItem('diaro_vault_password_hash', passwordHash);
+      localStorage.setItem('diaro_vault_email', loginEmail);
 
       // 4. Derive symmetric vault key from master password
       const derivedVaultKey = deriveKey(password);
@@ -274,7 +310,7 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
 
         setTimeout(async () => {
           setShowBiometric(false);
-          let loginEmail = creds.username.includes('@') ? creds.username : `${creds.username.toLowerCase()}@ynote.app`;
+          let loginEmail = creds.username.includes('@') ? creds.username : `${creds.username.toLowerCase()}@diaro.app`;
           
           const { data, error } = await supabase.auth.signInWithPassword({
             email: loginEmail,
@@ -282,8 +318,12 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
           });
 
           if (error) {
-            if (supabase.supabaseUrl && supabase.supabaseUrl.includes('your-project')) {
-              console.warn('Supabase using placeholder. Falling back to offline sandbox session.');
+            const isPlaceholder = supabase.supabaseUrl && supabase.supabaseUrl.includes('your-project');
+            const isRateLimit = error.message && error.message.toLowerCase().includes('rate limit') || error.status === 429;
+            const isNetworkError = !navigator.onLine || error.message?.includes('fetch') || error.message?.includes('NetworkError') || error.status === 0 || error.message?.includes('Load failed');
+
+            if (isPlaceholder || isRateLimit || isNetworkError) {
+              console.warn('Biometric online sync failed (offline/rate limit). Logging in with local cache.');
               const derivedVaultKey = deriveKey(creds.password);
               onAuthSuccess({
                 user: { email: loginEmail, user_metadata: { username: creds.username } },
@@ -317,6 +357,15 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
     }
   };
 
+  const autoTriggeredRef = useRef(false);
+
+  useEffect(() => {
+    if (isEnrolled && authMode === 'login' && !autoTriggeredRef.current && !initialMessage) {
+      autoTriggeredRef.current = true;
+      triggerBiometric();
+    }
+  }, [isEnrolled, authMode, initialMessage]);
+
   const cancelBiometric = () => {
     if (bioTimeoutRef.current) clearTimeout(bioTimeoutRef.current);
     setShowBiometric(false);
@@ -329,7 +378,7 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between overflow-hidden relative bg-bgDark text-purple-100 font-sans">
+    <div className="min-h-screen flex flex-col justify-between overflow-hidden relative bg-bgDark text-diaroAccent-100 font-sans">
       
       {/* Background Ambient Glow Objects */}
       <div className="fixed inset-0 z-0 pointer-events-none">
@@ -343,16 +392,16 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
       {/* Main Workspace Container */}
       <main className="relative z-10 w-full max-w-[480px] mx-auto px-4 my-auto">
         
-        {/* YNote Header Branding */}
+        {/* Diaro Header Branding */}
         <header className="text-center mb-8 flex flex-col items-center">
-          <div className="w-16 h-16 rounded-2xl bg-ynoteAccent-950/60 border border-ynoteAccent-500/25 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(59,130,246,0.15)]">
-            <span className="material-symbols-outlined text-[36px] text-ynoteAccent-400 font-light" style={{ fontVariationSettings: "'FILL' 0" }}>lock</span>
+          <div className="w-16 h-16 rounded-2xl bg-diaroAccent-950/60 border border-diaroAccent-500/25 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(184, 115, 51,0.15)]">
+            <span className="material-symbols-outlined text-[36px] text-diaroAccent-400 font-light" style={{ fontVariationSettings: "'FILL' 0" }}>lock</span>
           </div>
           <h1 className="text-4xl font-bold tracking-tight text-white mb-2 select-none">
-            <span className="shimmer-text">YNote</span>
+            <span className="shimmer-text">Diaro</span>
           </h1>
-          <p className="text-sm font-mono text-ynoteAccent-400 uppercase tracking-[0.25em] text-xs">
-            Capture Everything. Securely. 🔐
+          <p className="text-sm font-mono text-diaroAccent-400 uppercase tracking-[0.25em] text-xs">
+            Your Notes. Your Privacy. 🔐
           </p>
         </header>
 
@@ -370,7 +419,7 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
             <div className="relative z-10" id="login-container">
               <div className="flex flex-col mb-6">
                 <h2 className="text-2xl font-semibold text-white tracking-wide">Unlock Vault</h2>
-                <p className="text-sm text-purple-300/60 mt-1">Provide credential keys to decrypt your digital journal.</p>
+                <p className="text-sm text-diaroAccent-300/60 mt-1">Provide credential keys to decrypt your digital journal.</p>
               </div>
 
               {/* Error Notice Box */}
@@ -384,13 +433,13 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
               <form className="space-y-5" onSubmit={handleLoginSubmit} noValidate>
                 {/* Email / Username field */}
                 <div className="space-y-2">
-                  <label className="block text-xs font-mono text-ynoteAccent-300 uppercase tracking-widest" htmlFor="email-or-username">Email / Username</label>
+                  <label className="block text-xs font-mono text-diaroAccent-300 uppercase tracking-widest" htmlFor="email-or-username">Email / Username</label>
                   <div className="relative flex items-center">
-                    <span className="material-symbols-outlined absolute left-4 text-[20px] text-purple-400/50" style={{ fontVariationSettings: "'FILL' 0" }}>alternate_email</span>
+                    <span className="material-symbols-outlined absolute left-4 text-[20px] text-diaroAccent-400/50" style={{ fontVariationSettings: "'FILL' 0" }}>alternate_email</span>
                     <input 
-                      className="w-full pl-12 pr-4 py-3.5 rounded-xl text-white font-sans placeholder:text-purple-200/20 cyber-input outline-none focus:ring-0 text-sm" 
+                      className="w-full pl-12 pr-4 py-3.5 rounded-xl text-white font-sans placeholder:text-diaroAccent-200/20 cyber-input outline-none focus:ring-0 text-sm" 
                       id="email-or-username" 
-                      placeholder="e.g. secure@ynote.app" 
+                      placeholder="e.g. secure@diaro.app" 
                       required 
                       tabIndex="1"
                       type="text"
@@ -403,9 +452,9 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
                 {/* Password field */}
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <label className="block text-xs font-mono text-ynoteAccent-300 uppercase tracking-widest" htmlFor="password">Master Password</label>
+                    <label className="block text-xs font-mono text-diaroAccent-300 uppercase tracking-widest" htmlFor="password">Master Password</label>
                     <a 
-                      className="text-xs font-mono text-ynoteAccent-400 hover:text-white hover:underline transition-colors focus:outline-none focus:ring-1 focus:ring-ynoteAccent-500 rounded px-1" 
+                      className="text-xs font-mono text-diaroAccent-400 hover:text-white hover:underline transition-colors focus:outline-none focus:ring-1 focus:ring-diaroAccent-500 rounded px-1" 
                       href="#" 
                       onClick={handleForgotPassword}
                       tabIndex="5"
@@ -414,9 +463,9 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
                     </a>
                   </div>
                   <div className="relative flex items-center">
-                    <span className="material-symbols-outlined absolute left-4 text-[20px] text-purple-400/50" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
+                    <span className="material-symbols-outlined absolute left-4 text-[20px] text-diaroAccent-400/50" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
                     <input 
-                      className="w-full pl-12 pr-12 py-3.5 rounded-xl text-white font-sans placeholder:text-purple-200/20 cyber-input outline-none focus:ring-0 text-sm" 
+                      className="w-full pl-12 pr-12 py-3.5 rounded-xl text-white font-sans placeholder:text-diaroAccent-200/20 cyber-input outline-none focus:ring-0 text-sm" 
                       id="password" 
                       placeholder="Enter Decryption Key" 
                       required 
@@ -426,7 +475,7 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
                       onChange={(e) => setPassword(e.target.value)}
                     />
                     <button 
-                      className="absolute right-4 text-purple-400/50 hover:text-white transition-colors focus:outline-none" 
+                      className="absolute right-4 text-diaroAccent-400/50 hover:text-white transition-colors focus:outline-none" 
                       onClick={() => setObscurePassword(!obscurePassword)}
                       tabIndex="3"
                       type="button"
@@ -441,14 +490,14 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
                 {/* Remember me option */}
                 <div className="flex items-center">
                   <input 
-                    className="w-4.5 h-4.5 rounded bg-slate-900 border-purple-400/20 text-ynoteAccent-600 focus:ring-0 focus:ring-offset-0 cursor-pointer" 
+                    className="w-4.5 h-4.5 rounded bg-slate-900 border-diaroAccent-400/20 text-diaroAccent-600 focus:ring-0 focus:ring-offset-0 cursor-pointer" 
                     id="remember-me" 
                     tabIndex="4"
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
                   />
-                  <label className="ml-2.5 text-xs text-purple-200/50 select-none cursor-pointer hover:text-purple-100 transition-colors" htmlFor="remember-me">
+                  <label className="ml-2.5 text-xs text-diaroAccent-200/50 select-none cursor-pointer hover:text-diaroAccent-100 transition-colors" htmlFor="remember-me">
                     Keep keys cached on this device (Remember Me)
                   </label>
                 </div>
@@ -457,7 +506,7 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
                 <div className="space-y-3 pt-2">
                   <button 
                     disabled={isLoading}
-                    className="w-full py-4 bg-ynoteAccent-600 hover:bg-ynoteAccent-500 text-white font-semibold text-xs uppercase tracking-[0.15em] rounded-xl hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-ynoteAccent-500 disabled:opacity-50" 
+                    className="w-full py-4 bg-diaroAccent-600 hover:bg-diaroAccent-500 text-white font-semibold text-xs uppercase tracking-[0.15em] rounded-xl hover:shadow-[0_0_20px_rgba(184, 115, 51,0.3)] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-diaroAccent-500 disabled:opacity-50" 
                     id="login-submit-btn"
                     tabIndex="6"
                     type="submit"
@@ -481,7 +530,7 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
                   {/* Biometrics Button */}
                   {isEnrolled && (
                     <button 
-                      className="w-full py-3.5 bg-ynoteAccent-950/40 hover:bg-ynoteAccent-900/40 border border-ynoteAccent-500/20 text-ynoteAccent-400 hover:text-ynoteAccent-300 font-semibold text-xs uppercase tracking-[0.15em] rounded-xl active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2.5 focus:outline-none focus:ring-2 focus:ring-ynoteAccent-500" 
+                      className="w-full py-3.5 bg-diaroAccent-950/40 hover:bg-diaroAccent-900/40 border border-diaroAccent-500/20 text-diaroAccent-400 hover:text-diaroAccent-300 font-semibold text-xs uppercase tracking-[0.15em] rounded-xl active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2.5 focus:outline-none focus:ring-2 focus:ring-diaroAccent-500" 
                       id="biometric-btn"
                       onClick={triggerBiometric}
                       tabIndex="7"
@@ -496,10 +545,10 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
 
               {/* Create Account Link */}
               <div className="mt-8 text-center border-t border-slate-800/60 pt-6">
-                <p className="text-xs text-purple-200/40">
+                <p className="text-xs text-diaroAccent-200/40">
                   First time setting up your secure diary?
                   <a 
-                    className="text-ynoteAccent-400 hover:text-white font-semibold ml-1.5 focus:outline-none hover:underline" 
+                    className="text-diaroAccent-400 hover:text-white font-semibold ml-1.5 focus:outline-none hover:underline" 
                     href="#" 
                     onClick={(e) => { e.preventDefault(); setAuthMode('register'); }}
                     tabIndex="8"
@@ -514,19 +563,19 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
             <div className="relative z-10" id="register-container">
               <div className="flex flex-col mb-6">
                 <h2 className="text-2xl font-semibold text-white tracking-wide">Initialize Vault</h2>
-                <p className="text-sm text-purple-300/60 mt-1">Deploy keys to protect your encrypted diary.</p>
+                <p className="text-sm text-diaroAccent-300/60 mt-1">Deploy keys to protect your encrypted diary.</p>
               </div>
 
               <form className="space-y-4" onSubmit={handleRegisterSubmit} noValidate>
                 {/* Email field */}
                 <div className="space-y-1">
-                  <label className="block text-xs font-mono text-ynoteAccent-300 uppercase tracking-widest" htmlFor="reg-email">Email Address</label>
+                  <label className="block text-xs font-mono text-diaroAccent-300 uppercase tracking-widest" htmlFor="reg-email">Email Address</label>
                   <div className="relative flex items-center">
-                    <span className="material-symbols-outlined absolute left-4 text-[20px] text-purple-400/50">mail</span>
+                    <span className="material-symbols-outlined absolute left-4 text-[20px] text-diaroAccent-400/50">mail</span>
                     <input 
-                      className="w-full pl-12 pr-4 py-3 rounded-xl text-white font-sans placeholder:text-purple-200/20 cyber-input outline-none focus:ring-0 text-sm" 
+                      className="w-full pl-12 pr-4 py-3 rounded-xl text-white font-sans placeholder:text-diaroAccent-200/20 cyber-input outline-none focus:ring-0 text-sm" 
                       id="reg-email" 
-                      placeholder="secure@ynote.app" 
+                      placeholder="secure@diaro.app" 
                       required 
                       type="email"
                       value={regEmail}
@@ -537,11 +586,11 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
 
                 {/* Username field */}
                 <div className="space-y-1">
-                  <label className="block text-xs font-mono text-ynoteAccent-300 uppercase tracking-widest" htmlFor="reg-username">Username</label>
+                  <label className="block text-xs font-mono text-diaroAccent-300 uppercase tracking-widest" htmlFor="reg-username">Username</label>
                   <div className="relative flex items-center">
-                    <span className="material-symbols-outlined absolute left-4 text-[20px] text-purple-400/50">person</span>
+                    <span className="material-symbols-outlined absolute left-4 text-[20px] text-diaroAccent-400/50">person</span>
                     <input 
-                      className="w-full pl-12 pr-4 py-3 rounded-xl text-white font-sans placeholder:text-purple-200/20 cyber-input outline-none focus:ring-0 text-sm" 
+                      className="w-full pl-12 pr-4 py-3 rounded-xl text-white font-sans placeholder:text-diaroAccent-200/20 cyber-input outline-none focus:ring-0 text-sm" 
                       id="reg-username" 
                       placeholder="secure_user" 
                       required 
@@ -554,11 +603,11 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
 
                 {/* Master Password field */}
                 <div className="space-y-1">
-                  <label className="block text-xs font-mono text-ynoteAccent-300 uppercase tracking-widest" htmlFor="reg-password">Master Password</label>
+                  <label className="block text-xs font-mono text-diaroAccent-300 uppercase tracking-widest" htmlFor="reg-password">Master Password</label>
                   <div className="relative flex items-center">
-                    <span className="material-symbols-outlined absolute left-4 text-[20px] text-purple-400/50" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
+                    <span className="material-symbols-outlined absolute left-4 text-[20px] text-diaroAccent-400/50" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
                     <input 
-                      className="w-full pl-12 pr-12 py-3 rounded-xl text-white font-sans placeholder:text-purple-200/20 cyber-input outline-none focus:ring-0 text-sm" 
+                      className="w-full pl-12 pr-12 py-3 rounded-xl text-white font-sans placeholder:text-diaroAccent-200/20 cyber-input outline-none focus:ring-0 text-sm" 
                       id="reg-password" 
                       placeholder="Min 8 chars, 1 uppercase, 1 digit" 
                       required 
@@ -567,7 +616,7 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
                       onChange={(e) => setRegPassword(e.target.value)}
                     />
                     <button 
-                      className="absolute right-4 text-purple-400/50 hover:text-white transition-colors focus:outline-none" 
+                      className="absolute right-4 text-diaroAccent-400/50 hover:text-white transition-colors focus:outline-none" 
                       onClick={() => setObscureRegPassword(!obscureRegPassword)}
                       type="button"
                     >
@@ -580,11 +629,11 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
 
                 {/* Confirm Password field */}
                 <div className="space-y-1">
-                  <label className="block text-xs font-mono text-ynoteAccent-300 uppercase tracking-widest" htmlFor="reg-confirm-password">Confirm Password</label>
+                  <label className="block text-xs font-mono text-diaroAccent-300 uppercase tracking-widest" htmlFor="reg-confirm-password">Confirm Password</label>
                   <div className="relative flex items-center">
-                    <span className="material-symbols-outlined absolute left-4 text-[20px] text-purple-400/50" style={{ fontVariationSettings: "'FILL' 1" }}>lock_reset</span>
+                    <span className="material-symbols-outlined absolute left-4 text-[20px] text-diaroAccent-400/50" style={{ fontVariationSettings: "'FILL' 1" }}>lock_reset</span>
                     <input 
-                      className="w-full pl-12 pr-4 py-3 rounded-xl text-white font-sans placeholder:text-purple-200/20 cyber-input outline-none focus:ring-0 text-sm" 
+                      className="w-full pl-12 pr-4 py-3 rounded-xl text-white font-sans placeholder:text-diaroAccent-200/20 cyber-input outline-none focus:ring-0 text-sm" 
                       id="reg-confirm-password" 
                       placeholder="Verify Decryption Key" 
                       required 
@@ -599,7 +648,7 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
                 <div className="pt-3">
                   <button 
                     disabled={isLoading}
-                    className="w-full py-4 bg-ynoteAccent-600 hover:bg-ynoteAccent-500 text-white font-semibold text-xs uppercase tracking-[0.15em] rounded-xl hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-ynoteAccent-500 disabled:opacity-50" 
+                    className="w-full py-4 bg-diaroAccent-600 hover:bg-diaroAccent-500 text-white font-semibold text-xs uppercase tracking-[0.15em] rounded-xl hover:shadow-[0_0_20px_rgba(184, 115, 51,0.3)] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-diaroAccent-500 disabled:opacity-50" 
                     id="register-submit-btn"
                     type="submit"
                   >
@@ -623,10 +672,10 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
 
               {/* Back to Login Link */}
               <div className="mt-6 text-center border-t border-slate-800/60 pt-4">
-                <p className="text-xs text-purple-200/40">
+                <p className="text-xs text-diaroAccent-200/40">
                   Already have initialized keys?
                   <a 
-                    className="text-ynoteAccent-400 hover:text-white font-semibold ml-1.5 focus:outline-none hover:underline" 
+                    className="text-diaroAccent-400 hover:text-white font-semibold ml-1.5 focus:outline-none hover:underline" 
                     href="#" 
                     onClick={(e) => { e.preventDefault(); setAuthMode('login'); }}
                   >
@@ -640,9 +689,9 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
           {/* Biometric Overlay Scanner Screen */}
           {showBiometric && (
             <div className="absolute inset-0 bg-slate-950/95 z-30 flex flex-col items-center justify-center p-8 transition-opacity duration-300" id="biometric-overlay">
-              <div className="relative w-32 h-32 flex items-center justify-center rounded-full border border-ynoteAccent-500/20 bg-ynoteAccent-950/20 mb-6">
+              <div className="relative w-32 h-32 flex items-center justify-center rounded-full border border-diaroAccent-500/20 bg-diaroAccent-950/20 mb-6">
                 <span 
-                  className={`material-symbols-outlined text-[72px] ${bioStatus === 'success' ? 'text-emerald-400' : 'text-ynoteAccent-400'} ${bioStatus === 'scanning' ? 'animate-pulse' : ''}`}
+                  className={`material-symbols-outlined text-[72px] ${bioStatus === 'success' ? 'text-emerald-400' : 'text-diaroAccent-400'} ${bioStatus === 'scanning' ? 'animate-pulse' : ''}`}
                   id="fingerprint-icon"
                 >
                   fingerprint
@@ -654,10 +703,10 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
               </div>
               
               <h3 className="text-lg font-semibold text-white mb-2" id="bio-title">{bioTitle}</h3>
-              <p className="text-sm text-purple-300/60 text-center max-w-[280px]" id="bio-desc">{bioDesc}</p>
+              <p className="text-sm text-diaroAccent-300/60 text-center max-w-[280px]" id="bio-desc">{bioDesc}</p>
               
               <button 
-                className="mt-8 px-5 py-2 bg-slate-800 hover:bg-slate-700 text-purple-200 text-xs font-mono uppercase tracking-widest rounded-lg focus:outline-none border border-slate-700 transition-colors" 
+                className="mt-8 px-5 py-2 bg-slate-800 hover:bg-slate-700 text-diaroAccent-200 text-xs font-mono uppercase tracking-widest rounded-lg focus:outline-none border border-slate-700 transition-colors" 
                 onClick={cancelBiometric}
               >
                 Cancel Verification
@@ -667,7 +716,7 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
         </div>
 
         {/* Security and Encryption Trust Footer */}
-        <footer className="mt-8 flex items-center justify-center gap-2 text-purple-200/30 select-none">
+        <footer className="mt-8 flex items-center justify-center gap-2 text-diaroAccent-200/30 select-none">
           <span className="material-symbols-outlined text-[14px]">encrypted</span>
           <span className="font-mono text-[10px] uppercase tracking-widest">End-to-End Local AES-256 Architecture</span>
         </footer>
@@ -676,16 +725,16 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
       {/* CUSTOM ALERT DIALOG MODAL */}
       {showAlert && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <div className="glass-card rounded-3xl p-6 w-full max-w-md space-y-4 text-center border border-ynoteAccent-500/30 shadow-2xl relative overflow-hidden">
+          <div className="glass-card rounded-3xl p-6 w-full max-w-md space-y-4 text-center border border-diaroAccent-500/30 shadow-2xl relative overflow-hidden">
             <h3 className="text-lg font-semibold text-white tracking-wide">{alertTitle}</h3>
-            <p className="text-sm text-purple-300/70 whitespace-pre-line leading-relaxed font-sans">{alertContent}</p>
+            <p className="text-sm text-diaroAccent-300/70 whitespace-pre-line leading-relaxed font-sans">{alertContent}</p>
             <button 
               type="button" 
               onClick={() => {
                 setShowAlert(false);
                 if (alertCallback) alertCallback();
               }}
-              className="w-full py-3 bg-ynoteAccent-600 hover:bg-ynoteAccent-500 text-white text-xs font-semibold uppercase tracking-wider rounded-xl transition-all duration-200 hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] active:scale-[0.98]"
+              className="w-full py-3 bg-diaroAccent-600 hover:bg-diaroAccent-500 text-white text-xs font-semibold uppercase tracking-wider rounded-xl transition-all duration-200 hover:shadow-[0_0_15px_rgba(184, 115, 51,0.3)] active:scale-[0.98]"
             >
               OK
             </button>

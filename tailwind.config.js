@@ -7,21 +7,21 @@ export default {
   theme: {
     extend: {
       colors: {
-        ynoteAccent: {
-          50: '#faf5ff',
-          100: '#f3e8ff',
-          200: '#e9d5ff',
-          300: '#d8b4fe',
-          400: '#c084fc',
-          500: '#a855f7', // Main accent
-          600: '#9333ea',
-          700: '#7e22ce',
-          800: '#6b21a8',
-          900: '#581c87',
-          950: '#3b0764',
+        diaroAccent: {
+          50: '#fbf8f5',
+          100: '#f5ece3',
+          200: '#ebd7c4',
+          300: '#ddba9b',
+          400: '#ce966e',
+          500: '#b87333', // Main accent (Copper Bronze)
+          600: '#a76128',
+          700: '#8b4b1f',
+          800: '#713c1c',
+          900: '#5d3219',
+          950: '#331a0c',
         },
-        bgDark: '#05010a',      // Very dark obsidian purple
-        surfaceDark: '#0f051a', // Slate-dark card background
+        bgDark: '#000000',      // Obsidian Pure Black
+        surfaceDark: '#050505', // Deep Black card background
       },
       fontFamily: {
         sans: ['Outfit', 'sans-serif'],

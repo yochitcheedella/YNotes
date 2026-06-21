@@ -1,6 +1,6 @@
 {
-  "version": "1.0.2",
-  "versionCode": 3,
-  "downloadUrl": "https://github.com/yochitcheedella/YNotes/releases/download/v1.0.2/Diaro_v1.0.2.apk",
-  "releaseNotes": "Massive UI redesign with premium Diaro glassmorphism theme and Auto-Update capabilities."
+  "version": "1.0.7",
+  "versionCode": 8,
+  "downloadUrl": "https://github.com/yochitcheedella/YNotes/releases/download/v1.0.7/Diaro_v1.0.7.apk",
+  "releaseNotes": "Biometric fingerprint authentication lock screen and fully functional real-time offline-capable AI voice diary transcriber."
 }

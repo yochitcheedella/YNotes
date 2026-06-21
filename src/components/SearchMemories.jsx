@@ -38,14 +38,14 @@ export default function SearchMemories({ notes, onSelectNote }) {
         {/* Search Header */}
         <div>
           <h2 className="text-xl font-semibold text-white tracking-wide">Search Memories</h2>
-          <p className="text-xs text-purple-300/40 mt-1">Locate entries using plaintext queries. Encryption keys remain in sandbox.</p>
+          <p className="text-xs text-diaroAccent-300/40 mt-1">Locate entries using plaintext queries. Encryption keys remain in sandbox.</p>
         </div>
 
         {/* Input Bar */}
         <div className="relative flex items-center">
-          <span className="material-symbols-outlined absolute left-4 text-[22px] text-purple-400/50">search</span>
+          <span className="material-symbols-outlined absolute left-4 text-[22px] text-diaroAccent-400/50">search</span>
           <input 
-            className="w-full pl-12 pr-12 py-3.5 rounded-xl text-white font-sans placeholder:text-purple-200/20 cyber-input outline-none focus:ring-0 text-sm" 
+            className="w-full pl-12 pr-12 py-3.5 rounded-xl text-white font-sans placeholder:text-diaroAccent-200/20 cyber-input outline-none focus:ring-0 text-sm" 
             placeholder="Type search terms (e.g. 'Morning', 'reflection')..." 
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -53,7 +53,7 @@ export default function SearchMemories({ notes, onSelectNote }) {
           {query && (
             <button 
               onClick={handleClear}
-              className="absolute right-4 text-purple-300/40 hover:text-white transition-colors"
+              className="absolute right-4 text-diaroAccent-300/40 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined text-[20px]">close</span>
             </button>
@@ -64,7 +64,7 @@ export default function SearchMemories({ notes, onSelectNote }) {
         <div className="space-y-4 pt-2 border-t border-slate-800/40">
           {/* Mood Selector Chips */}
           <div className="space-y-1.5">
-            <span className="text-[10px] font-mono text-ynoteAccent-300 uppercase tracking-widest block">Mood Filters</span>
+            <span className="text-[10px] font-mono text-diaroAccent-300 uppercase tracking-widest block">Mood Filters</span>
             <div className="flex flex-wrap gap-2">
               {['all', 'happy', 'neutral', 'sad', 'angry', 'excited'].map(m => (
                 <button
@@ -72,8 +72,8 @@ export default function SearchMemories({ notes, onSelectNote }) {
                   onClick={() => setSelectedMood(m)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-mono border transition-all capitalize
                     ${selectedMood === m 
-                      ? 'bg-ynoteAccent-600/35 border-ynoteAccent-500 text-white' 
-                      : 'bg-[#0f172a]/60 border-purple-400/10 text-purple-300/50 hover:text-white'
+                      ? 'bg-diaroAccent-600/35 border-diaroAccent-500 text-white' 
+                      : 'bg-[#0f172a]/60 border-diaroAccent-400/10 text-diaroAccent-300/50 hover:text-white'
                     }
                   `}
                 >
@@ -85,7 +85,7 @@ export default function SearchMemories({ notes, onSelectNote }) {
 
           {/* Media Filter Chips */}
           <div className="space-y-1.5">
-            <span className="text-[10px] font-mono text-ynoteAccent-300 uppercase tracking-widest block">Media Category</span>
+            <span className="text-[10px] font-mono text-diaroAccent-300 uppercase tracking-widest block">Media Category</span>
             <div className="flex flex-wrap gap-2">
               {['all', 'text', 'voice', 'images'].map(cat => (
                 <button
@@ -93,8 +93,8 @@ export default function SearchMemories({ notes, onSelectNote }) {
                   onClick={() => setSelectedMedia(cat)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-mono border transition-all capitalize
                     ${selectedMedia === cat 
-                      ? 'bg-ynoteAccent-600/35 border-ynoteAccent-500 text-white' 
-                      : 'bg-[#0f172a]/60 border-purple-400/10 text-purple-300/50 hover:text-white'
+                      ? 'bg-diaroAccent-600/35 border-diaroAccent-500 text-white' 
+                      : 'bg-[#0f172a]/60 border-diaroAccent-400/10 text-diaroAccent-300/50 hover:text-white'
                     }
                   `}
                 >
@@ -118,28 +118,28 @@ export default function SearchMemories({ notes, onSelectNote }) {
             <div 
               key={note.id}
               onClick={() => onSelectNote(note)}
-              className="glass-card rounded-xl p-5 hover:border-ynoteAccent-500/30 transition-all cursor-pointer group animate-fade-in"
+              className="glass-card rounded-xl p-5 hover:border-diaroAccent-500/30 transition-all cursor-pointer group animate-fade-in"
             >
               <div className="flex justify-between items-start mb-2">
-                <h4 className="text-md font-semibold text-white group-hover:text-ynoteAccent-400 transition-colors">
+                <h4 className="text-md font-semibold text-white group-hover:text-diaroAccent-400 transition-colors">
                   {note.title}
                 </h4>
-                <span className="text-xs text-purple-300/40 font-mono">
+                <span className="text-xs text-diaroAccent-300/40 font-mono">
                   {new Date(note.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
                 </span>
               </div>
-              <p className="text-sm text-purple-100/60 line-clamp-2 mb-3">
+              <p className="text-sm text-diaroAccent-100/60 line-clamp-2 mb-3">
                 {note.content}
               </p>
               <div className="flex gap-2">
-                <span className="px-2.5 py-0.5 text-xs rounded-full bg-slate-950/60 text-ynoteAccent-300 capitalize">
+                <span className="px-2.5 py-0.5 text-xs rounded-full bg-slate-950/60 text-diaroAccent-300 capitalize">
                   {note.mood || 'Calm'}
                 </span>
               </div>
             </div>
           ))
         ) : (
-          <div className="text-center py-16 text-purple-300/20 font-mono text-sm">
+          <div className="text-center py-16 text-diaroAccent-300/20 font-mono text-sm">
             ❌ No matching memories found in secure storage.
           </div>
         )}

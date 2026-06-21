@@ -2,7 +2,7 @@ import CryptoJS from 'crypto-js';
 
 // Constant salt for local key derivation.
 // In production, user-specific salts can be fetched, but a static local salt is standard for local vault setups.
-const LOCAL_SALT = 'ynote-vault-salt-PBKDF2-sha256';
+const LOCAL_SALT = 'diaro-vault-salt-PBKDF2-sha256';
 
 /**
  * Derives a strong 256-bit key from a password.
@@ -66,3 +66,14 @@ export function generateRecoveryKey() {
   const segment = () => Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
   return `YN-${segment()}-${segment()}-${segment()}`;
 }
+
+/**
+ * Generates a SHA-256 hash of the master password for secure local offline verification.
+ * @param {string} password 
+ * @returns {string} Hash in Hex format
+ */
+export function hashPassword(password) {
+  if (!password) return '';
+  return CryptoJS.SHA256(password).toString();
+}
+
