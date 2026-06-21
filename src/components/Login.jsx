@@ -211,12 +211,15 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
       });
 
       if (error) {
-        if (supabase.supabaseUrl && supabase.supabaseUrl.includes('your-project')) {
-          console.warn('Supabase using placeholder. Falling back to offline sandbox registration.');
+        const isPlaceholder = supabase.supabaseUrl && supabase.supabaseUrl.includes('your-project');
+        const isRateLimit = error.message && error.message.toLowerCase().includes('rate limit');
+
+        if (isPlaceholder || isRateLimit) {
+          console.warn('Supabase using placeholder or rate limit exceeded. Falling back to offline sandbox registration.');
           const recoveryKey = generateRecoveryKey();
           showCustomAlert(
-            'Sandbox Vault Initialized', 
-            `[Offline Sandbox Mode]\nVault created successfully!\n\nYour SECURE RECOVERY KEY is:\n${recoveryKey}\n\nSave this key immediately. It is required to recover your vault if you forget your master password.`,
+            isRateLimit ? 'Offline Vault Initialized (Rate Limited)' : 'Sandbox Vault Initialized', 
+            `[Offline Mode]\nVault created successfully!\n\nYour SECURE RECOVERY KEY is:\n${recoveryKey}\n\nSave this key immediately. It is required to recover your vault if you forget your master password.`,
             () => {
               const derivedVaultKey = deriveKey(regPassword);
               onAuthSuccess({

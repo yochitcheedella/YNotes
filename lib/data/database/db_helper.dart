@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import '../models/diary_entry.dart';
 import '../models/attachment.dart';
+import '../models/pending_sync.dart';
 import '../../core/security/encryption_service.dart';
 import '../../core/utils/app_logger.dart';
 
@@ -24,7 +25,7 @@ class DBHelper {
   bool _isDecoyMode = false;
   String _masterPassword = '';
 
-  static const int _dbVersion = 2;
+  static const int _dbVersion = 5;
 
   // ──────────────────────────────────────────────
   // Connection management
@@ -61,6 +62,42 @@ class DBHelper {
           await db.execute('ALTER TABLE DiaryEntries ADD COLUMN UpdatedAt TEXT');
           AppLogger.info('Schema migration: Added UpdatedAt column');
         }
+        if (oldVersion < 3) {
+          // Add SupabaseID column
+          await db.execute('ALTER TABLE DiaryEntries ADD COLUMN SupabaseID TEXT');
+          AppLogger.info('Schema migration: Added SupabaseID column');
+        }
+        if (oldVersion < 4) {
+          // Alter DiaryEntries
+          await db.execute('ALTER TABLE DiaryEntries ADD COLUMN LastUpdatedBy TEXT');
+          await db.execute('ALTER TABLE DiaryEntries ADD COLUMN SyncHash TEXT');
+          await db.execute('ALTER TABLE DiaryEntries ADD COLUMN IsConflict INTEGER DEFAULT 0');
+          await db.execute('ALTER TABLE DiaryEntries ADD COLUMN ParentSupabaseID TEXT');
+          await db.execute('ALTER TABLE DiaryEntries ADD COLUMN ConflictDeviceID TEXT');
+
+          // Create PendingSync table
+          await db.execute('''
+            CREATE TABLE PendingSync (
+              QueueID   INTEGER PRIMARY KEY AUTOINCREMENT,
+              EntryID   INTEGER,
+              SupabaseID TEXT,
+              Action    TEXT NOT NULL,
+              Payload   TEXT,
+              CreatedAt TEXT NOT NULL,
+              Attempts  INTEGER DEFAULT 0,
+              Priority  INTEGER DEFAULT 1,
+              LastError TEXT,
+              Status    TEXT DEFAULT 'PENDING',
+              NextRetry TEXT
+            )
+          ''');
+          AppLogger.info('Schema migration: Upgraded to version 4 (Advanced Sync)');
+        }
+        if (oldVersion < 5) {
+          // Add SyncID column for idempotency protocol
+          await db.execute('ALTER TABLE DiaryEntries ADD COLUMN SyncID TEXT');
+          AppLogger.info('Schema migration: Added SyncID column (v5)');
+        }
       },
     );
 
@@ -91,7 +128,7 @@ class DBHelper {
       )
     ''');
 
-    // DiaryEntries table — v2 schema includes UpdatedAt
+    // DiaryEntries table — v4 schema includes tracking and conflict forks
     await db.execute('''
       CREATE TABLE DiaryEntries (
         EntryID   INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -102,7 +139,31 @@ class DBHelper {
         Mood      TEXT NOT NULL,
         CreatedAt TEXT NOT NULL,
         UpdatedAt TEXT,
+        SupabaseID TEXT,
+        LastUpdatedBy TEXT,
+        SyncHash TEXT,
+        IsConflict INTEGER DEFAULT 0,
+        ParentSupabaseID TEXT,
+        ConflictDeviceID TEXT,
+        SyncID TEXT,
         FOREIGN KEY (UserID) REFERENCES Users(UserID)
+      )
+    ''');
+
+    // PendingSync table
+    await db.execute('''
+      CREATE TABLE PendingSync (
+        QueueID   INTEGER PRIMARY KEY AUTOINCREMENT,
+        EntryID   INTEGER,
+        SupabaseID TEXT,
+        Action    TEXT NOT NULL,
+        Payload   TEXT,
+        CreatedAt TEXT NOT NULL,
+        Attempts  INTEGER DEFAULT 0,
+        Priority  INTEGER DEFAULT 1,
+        LastError TEXT,
+        Status    TEXT DEFAULT 'PENDING',
+        NextRetry TEXT
       )
     ''');
 
@@ -339,14 +400,49 @@ class DBHelper {
   /// Searches entries by keyword in title or content (case-insensitive).
   /// Returns pre-filtered rows from SQLite when possible to reduce Dart-side work.
   Future<List<DiaryEntry>> searchEntries(String keyword) async {
-    // Since content is encrypted, full-text search must happen in Dart after decryption.
-    // But we can at least filter by date range or other non-encrypted fields at DB level.
-    // Load all and filter in memory (acceptable for diaries under ~10k entries).
     final all = await getAllEntries();
     final lc = keyword.toLowerCase();
     return all.where((e) =>
       e.title.toLowerCase().contains(lc) ||
       e.content.toLowerCase().contains(lc)
     ).toList();
+  }
+
+  // ──────────────────────────────────────────────
+  // Pending Sync Queue Methods
+  // ──────────────────────────────────────────────
+
+  Future<int> pushToQueue(PendingSync item) async {
+    final db = await database;
+    return await db.insert('PendingSync', item.toMap());
+  }
+
+  Future<List<PendingSync>> getPendingQueue() async {
+    final db = await database;
+    final maps = await db.query(
+      'PendingSync',
+      where: "Status = 'PENDING' OR Status = 'FAILED'",
+      orderBy: 'Priority DESC, CreatedAt ASC',
+    );
+    return maps.map((map) => PendingSync.fromMap(map)).toList();
+  }
+
+  Future<int> updateQueueItem(PendingSync item) async {
+    final db = await database;
+    return await db.update(
+      'PendingSync',
+      item.toMap(),
+      where: 'QueueID = ?',
+      whereArgs: [item.queueId],
+    );
+  }
+
+  Future<int> deleteQueueItem(int queueId) async {
+    final db = await database;
+    return await db.delete(
+      'PendingSync',
+      where: 'QueueID = ?',
+      whereArgs: [queueId],
+    );
   }
 }

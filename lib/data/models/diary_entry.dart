@@ -13,6 +13,13 @@ class DiaryEntry {
   final DateTime? expiresAt;
   final int? maxViews;
   final int viewsCount;
+  final String? supabaseId;
+  final String? lastUpdatedBy;
+  final String? syncHash;
+  final bool isConflict;
+  final String? parentSupabaseId;
+  final String? conflictDeviceId;
+  final String? syncId; // Idempotency key for network retries
 
   DiaryEntry({
     this.id,
@@ -27,6 +34,13 @@ class DiaryEntry {
     this.expiresAt,
     this.maxViews,
     this.viewsCount = 0,
+    this.supabaseId,
+    this.lastUpdatedBy,
+    this.syncHash,
+    this.isConflict = false,
+    this.parentSupabaseId,
+    this.conflictDeviceId,
+    this.syncId,
   });
 
   /// Serialize to SQLite-compatible map.
@@ -43,6 +57,13 @@ class DiaryEntry {
       'ExpiresAt': expiresAt?.toIso8601String(),
       'MaxViews': maxViews,
       'ViewsCount': viewsCount,
+      'SupabaseID': supabaseId,
+      'LastUpdatedBy': lastUpdatedBy,
+      'SyncHash': syncHash,
+      'IsConflict': isConflict ? 1 : 0,
+      'ParentSupabaseID': parentSupabaseId,
+      'ConflictDeviceID': conflictDeviceId,
+      'SyncID': syncId,
     };
     // Only include EntryID if it exists (prevents SQLite insertion issues)
     if (id != null) map['EntryID'] = id;
@@ -63,6 +84,13 @@ class DiaryEntry {
       expiresAt: map['ExpiresAt'] != null ? DateTime.tryParse(map['ExpiresAt'] as String) : null,
       maxViews: map['MaxViews'] as int?,
       viewsCount: map['ViewsCount'] as int? ?? 0,
+      supabaseId: map['SupabaseID'] as String?,
+      lastUpdatedBy: map['LastUpdatedBy'] as String?,
+      syncHash: map['SyncHash'] as String?,
+      isConflict: (map['IsConflict'] as int? ?? 0) == 1,
+      parentSupabaseId: map['ParentSupabaseID'] as String?,
+      conflictDeviceId: map['ConflictDeviceID'] as String?,
+      syncId: map['SyncID'] as String?,
     );
   }
 
@@ -81,6 +109,13 @@ class DiaryEntry {
     DateTime? expiresAt,
     int? maxViews,
     int? viewsCount,
+    String? supabaseId,
+    String? lastUpdatedBy,
+    String? syncHash,
+    bool? isConflict,
+    String? parentSupabaseId,
+    String? conflictDeviceId,
+    String? syncId,
   }) {
     return DiaryEntry(
       id: id ?? this.id,
@@ -95,6 +130,13 @@ class DiaryEntry {
       expiresAt: expiresAt ?? this.expiresAt,
       maxViews: maxViews ?? this.maxViews,
       viewsCount: viewsCount ?? this.viewsCount,
+      supabaseId: supabaseId ?? this.supabaseId,
+      lastUpdatedBy: lastUpdatedBy ?? this.lastUpdatedBy,
+      syncHash: syncHash ?? this.syncHash,
+      isConflict: isConflict ?? this.isConflict,
+      parentSupabaseId: parentSupabaseId ?? this.parentSupabaseId,
+      conflictDeviceId: conflictDeviceId ?? this.conflictDeviceId,
+      syncId: syncId ?? this.syncId,
     );
   }
 }

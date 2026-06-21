@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../providers/auth_provider.dart';
+import '../../auth/auth_provider.dart';
 import '../providers/diary_provider.dart';
 import '../../core/constants/app_theme.dart';
 import 'entry_editor_screen.dart';
 import 'mood_analytics_screen.dart';
 import 'settings_screen.dart';
 import 'backup_screen.dart';
+import 'conflict_resolver_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -32,6 +33,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       const MoodAnalyticsScreen(),
       const SettingsScreen(),
     ];
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<DiaryProvider>(context, listen: false).loadEntries();
+    });
   }
 
   @override
@@ -167,18 +171,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
 
           // Entries List
-          selectedEntries.isEmpty
-              ? _buildEmptyState()
-              : ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  itemCount: selectedEntries.length,
-                  itemBuilder: (context, index) {
-                    final entry = selectedEntries[index];
-                    return _buildEntryCard(entry);
-                  },
-                ),
+          if (selectedEntries.isEmpty) _buildEmptyState() else ..._buildGroupedEntries(selectedEntries),
           const SizedBox(height: 80),
         ],
       ),
@@ -501,6 +494,90 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  List<Widget> _buildGroupedEntries(List<DiaryEntry> entries) {
+    final List<Widget> widgets = [];
+    final Set<int> processedIds = {};
+
+    for (final entry in entries) {
+      if (processedIds.contains(entry.id)) continue;
+
+      if (!entry.isConflict) {
+        final conflicts = entries.where((e) => e.isConflict && e.parentSupabaseId == entry.supabaseId && e.parentSupabaseId != null).toList();
+        if (conflicts.isNotEmpty) {
+          widgets.add(_buildConflictGroupCard(entry, conflicts.first));
+          processedIds.add(entry.id!);
+          processedIds.add(conflicts.first.id!);
+        } else {
+          widgets.add(_buildEntryCard(entry));
+          processedIds.add(entry.id!);
+        }
+      } else {
+        // standalone conflict without parent in current view
+        widgets.add(_buildEntryCard(entry));
+        processedIds.add(entry.id!);
+      }
+    }
+    
+    return widgets.map((w) => Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: w,
+    )).toList();
+  }
+
+  Widget _buildConflictGroupCard(DiaryEntry mainEntry, DiaryEntry conflictEntry) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ConflictResolverScreen(
+              original: mainEntry,
+              conflict: conflictEntry,
+            ),
+          ),
+        );
+      },
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 12),
+        color: Colors.orange.shade50,
+        shape: RoundedRectangleBorder(
+          side: const BorderSide(color: Colors.orange, width: 1.5),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                  SizedBox(width: 8),
+                  Text(
+                    'Sync Conflict: 2 versions exist',
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                mainEntry.title,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Tap to review and resolve the conflict.',
+                style: TextStyle(color: Colors.black54, fontSize: 14),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   // ================= TAB 2: SEARCH SYSTEM =================
 
   Widget _buildSearchTab() {
@@ -609,12 +686,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ],
                     ),
                   )
-                : ListView.builder(
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) {
-                      final entry = filtered[index];
-                      return _buildEntryCard(entry);
-                    },
+                : ListView(
+                    children: _buildGroupedEntries(filtered),
                   ),
           ),
         ],

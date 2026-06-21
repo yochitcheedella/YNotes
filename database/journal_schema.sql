@@ -4,6 +4,11 @@ CREATE TABLE IF NOT EXISTS journal_entries (
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   title TEXT,
   content TEXT,
+  mood TEXT DEFAULT 'Neutral',
+  entry_date TIMESTAMPTZ DEFAULT NOW(),
+  expires_at TIMESTAMPTZ,
+  max_views INTEGER,
+  views_count INTEGER DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

@@ -3,12 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/constants/app_theme.dart';
 import 'core/security/auto_lock_service.dart';
-import 'presentation/providers/auth_provider.dart';
+import 'auth/auth_provider.dart';
 import 'presentation/providers/diary_provider.dart';
 import 'presentation/providers/theme_provider.dart';
-import 'presentation/screens/splash_screen.dart';
+import 'screens/splash_screen.dart';
 import 'presentation/screens/onboarding_screen.dart';
-import 'presentation/screens/login_screen.dart';
+import 'screens/login_screen.dart';
 import 'presentation/screens/dashboard_screen.dart';
 
 import 'core/utils/app_logger.dart';
@@ -71,10 +71,6 @@ class _DiaroAppState extends State<DiaroApp> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     
-    // Check session on startup
-    final session = Supabase.instance.client.auth.currentSession;
-    final initialRoute = session != null ? '/dashboard' : '/login';
-
     return MaterialApp(
       title: 'Diaro',
       debugShowCheckedModeBanner: false,
@@ -88,7 +84,7 @@ class _DiaroAppState extends State<DiaroApp> {
         );
       },
       
-      initialRoute: initialRoute,
+      initialRoute: '/',
       routes: {
         '/': (context) => const SplashScreen(),
         '/onboarding': (context) => const OnboardingScreen(),

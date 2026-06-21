@@ -183,4 +183,116 @@ class EncryptionService {
   static String _sha256Hex(String input) {
     return sha256.convert(utf8.encode(input)).toString();
   }
+
+  /// PBKDF2-HMAC-SHA1 key derivation (matches CryptoJS default).
+  static List<int> pbkdf2Sha1(String password, List<int> salt, int iterations, int keyLength) {
+    final passwordBytes = utf8.encode(password);
+    final hmacKey = Hmac(sha1, passwordBytes);
+    final result = <int>[];
+    
+    int blockIndex = 1;
+    while (result.length < keyLength) {
+      final saltPlusBlockIndex = Uint8List(salt.length + 4);
+      saltPlusBlockIndex.setRange(0, salt.length, salt);
+      saltPlusBlockIndex[salt.length] = (blockIndex >> 24) & 0xFF;
+      saltPlusBlockIndex[salt.length + 1] = (blockIndex >> 16) & 0xFF;
+      saltPlusBlockIndex[salt.length + 2] = (blockIndex >> 8) & 0xFF;
+      saltPlusBlockIndex[salt.length + 3] = blockIndex & 0xFF;
+      
+      var u = hmacKey.convert(saltPlusBlockIndex).bytes;
+      var xorSum = List<int>.from(u);
+      for (int i = 1; i < iterations; i++) {
+        u = hmacKey.convert(u).bytes;
+        for (int j = 0; j < xorSum.length; j++) {
+          xorSum[j] ^= u[j];
+        }
+      }
+      result.addAll(xorSum);
+      blockIndex++;
+    }
+    return result.sublist(0, keyLength);
+  }
+
+  /// CryptoJS-compatible Vault Key derivation (PBKDF2-HMAC-SHA1 with 1000 iterations).
+  static String deriveVaultKey(String password) {
+    const localSalt = 'ynote-vault-salt-PBKDF2-sha256';
+    final saltBytes = utf8.encode(localSalt);
+    final keyBytes = pbkdf2Sha1(password, saltBytes, 1000, 32);
+    return keyBytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+  }
+
+  /// MD5-based OpenSSL EvpKDF (EVP_BytesToKey equivalent).
+  static List<List<int>> _evpKDF(String passphrase, List<int> saltBytes) {
+    final passphraseBytes = utf8.encode(passphrase);
+    final keySource = <int>[];
+    var currentBlock = <int>[];
+    
+    while (keySource.length < 48) {
+      final input = <int>[...currentBlock, ...passphraseBytes, ...saltBytes];
+      final hash = md5.convert(input).bytes;
+      keySource.addAll(hash);
+      currentBlock = hash;
+    }
+    
+    final key = keySource.sublist(0, 32);
+    final iv = keySource.sublist(32, 48);
+    return [key, iv];
+  }
+
+  /// Encrypts plaintext using CryptoJS OpenSSL-compatible AES-256-CBC format.
+  static String encryptCryptoJS(String plainText, String passphrase) {
+    if (plainText.isEmpty) return '';
+    try {
+      final rand = Random.secure();
+      final saltBytes = Uint8List(8);
+      for (int i = 0; i < 8; i++) {
+        saltBytes[i] = rand.nextInt(256);
+      }
+
+      final derived = _evpKDF(passphrase, saltBytes);
+      final key = enc.Key(Uint8List.fromList(derived[0]));
+      final iv = enc.IV(Uint8List.fromList(derived[1]));
+
+      final encrypter = enc.Encrypter(enc.AES(key, mode: enc.AESMode.cbc));
+      final encrypted = encrypter.encrypt(plainText, iv: iv);
+
+      final prefix = utf8.encode("Salted__");
+      final combined = Uint8List(prefix.length + saltBytes.length + encrypted.bytes.length);
+      combined.setRange(0, prefix.length, prefix);
+      combined.setRange(prefix.length, prefix.length + saltBytes.length, saltBytes);
+      combined.setRange(prefix.length + saltBytes.length, combined.length, encrypted.bytes);
+
+      return base64Encode(combined);
+    } catch (e) {
+      AppLogger.error('CryptoJS encryption failed', exception: e);
+      return plainText;
+    }
+  }
+
+  /// Decrypts a CryptoJS OpenSSL-compatible AES-256-CBC ciphertext.
+  static String decryptCryptoJS(String cipherText, String passphrase) {
+    if (cipherText.isEmpty) return '';
+    try {
+      final combined = base64Decode(cipherText);
+      final prefix = utf8.encode("Salted__");
+
+      if (combined.length < 16) return '[Decryption failed: ciphertext too short]';
+      for (int i = 0; i < prefix.length; i++) {
+        if (combined[i] != prefix[i]) return '[Decryption failed: invalid prefix]';
+      }
+
+      final saltBytes = combined.sublist(8, 16);
+      final ciphertextBytes = combined.sublist(16);
+
+      final derived = _evpKDF(passphrase, saltBytes);
+      final key = enc.Key(Uint8List.fromList(derived[0]));
+      final iv = enc.IV(Uint8List.fromList(derived[1]));
+
+      final encrypter = enc.Encrypter(enc.AES(key, mode: enc.AESMode.cbc));
+      return encrypter.decrypt(enc.Encrypted(ciphertextBytes), iv: iv);
+    } catch (e) {
+      AppLogger.error('CryptoJS decryption failed', exception: e);
+      return '[Decryption failed: invalid key or corrupted payload]';
+    }
+  }
 }
