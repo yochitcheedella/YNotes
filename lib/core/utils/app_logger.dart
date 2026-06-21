@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 
-/// Production-safe logger for YNote.
+/// Production-safe logger for Diaro.
 /// In release builds, all log output is completely suppressed.
 /// In debug builds, messages are printed to stderr with timestamps and levels.
 class AppLogger {
-  static const String _appTag = '[YNote]';
+  static const String _appTag = '[Diaro]';
 
   static void debug(String message, {String? tag}) {
     if (kDebugMode) {

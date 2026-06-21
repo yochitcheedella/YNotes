@@ -105,7 +105,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'YNote',
+                        'Diaro',
                         style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                           fontSize: 48,
                           fontWeight: FontWeight.bold,

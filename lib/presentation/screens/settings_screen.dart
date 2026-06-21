@@ -267,7 +267,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSectionHeader('About App'),
           const ListTile(
             leading: Icon(Icons.info_outline),
-            title: Text('YNote Mobile Client'),
+            title: Text('Diaro Mobile Client'),
             subtitle: Text('Version 1.0.0+2 (Production Build)\nYour Thoughts. Your Memories. Your Privacy. 🔐'),
           ),
           const SizedBox(height: 60),

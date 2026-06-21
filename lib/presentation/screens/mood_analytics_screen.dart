@@ -140,7 +140,7 @@ class _MoodAnalyticsScreenState extends State<MoodAnalyticsScreen> {
                           Text(
                             dominantMood == "None" 
                                 ? 'No entries recorded for this month.'
-                                : 'You recorded $totalEntries memories. Your dominant emotional tone was $dominantMood ($maxCount log(s)). Keep expressing yourself in YNote!',
+                                : 'You recorded $totalEntries memories. Your dominant emotional tone was $dominantMood ($maxCount log(s)). Keep expressing yourself in Diaro!',
                             style: const TextStyle(fontSize: 13, color: Colors.grey),
                           ),
                         ],

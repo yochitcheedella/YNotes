@@ -43,8 +43,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final authProvider = Provider.of<AuthProvider>(context);
 
-    // Subtle Decoy check. If in decoy mode, change the AppBar title slightly (e.g. "My Notes" vs "YNote")
-    final title = authProvider.isDecoyMode ? "My Journal" : "YNote";
+    // Subtle Decoy check. If in decoy mode, change the AppBar title slightly (e.g. "My Notes" vs "Diaro")
+    final title = authProvider.isDecoyMode ? "My Journal" : "Diaro";
 
     return Scaffold(
       appBar: AppBar(

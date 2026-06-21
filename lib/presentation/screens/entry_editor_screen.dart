@@ -172,7 +172,7 @@ class _EntryEditorScreenState extends State<EntryEditorScreen> {
   void _simulateSpeechToText() {
     // Appends a mock text transcript block of the voice recording into the diary
     final timestamp = DateFormat('jm').format(DateTime.now());
-    const mockTranscript = "\n\n*🎤 Speech-to-Text Transcription ($timestamp):*\n\"Wrote about my day today, logging my secure thoughts into YNote. Ensuring everything remains private on this encrypted database. Feeling accomplished and ready for tomorrow.\"";
+    const mockTranscript = "\n\n*🎤 Speech-to-Text Transcription ($timestamp):*\n\"Wrote about my day today, logging my secure thoughts into Diaro. Ensuring everything remains private on this encrypted database. Feeling accomplished and ready for tomorrow.\"";
     
     showDialog(
       context: context,

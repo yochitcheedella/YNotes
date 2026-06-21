@@ -26,7 +26,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final List<Map<String, String>> _slides = [
     {
-      'title': 'Welcome to YNote',
+      'title': 'Welcome to Diaro',
       'description': 'Your ultimate personal diary and journal designed to capture your memories while keeping them entirely private.',
       'icon': '📝',
     },
@@ -247,7 +247,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               // Biometrics switch
                               SwitchListTile(
                                 title: const Text('Enable Fingerprint Login'),
-                                subtitle: const Text('Unlock YNote using biometric authentication'),
+                                subtitle: const Text('Unlock Diaro using biometric authentication'),
                                 value: _enableBiometrics,
                                 onChanged: (val) => setState(() => _enableBiometrics = val),
                                 activeColor: AppColors.darkPrimary,
