@@ -66,18 +66,26 @@ export default function BiometricLock({ email, password, onSuccess, onFallbackPa
 
   const unlockWithPassword = async (pwd, userEmail) => {
     try {
-      const vaultKey = deriveKey(pwd);
       let loginEmail = userEmail.includes('@') ? userEmail : `${userEmail.toLowerCase()}@diaro.app`;
 
-      // Refresh Supabase session silently in background
-      supabase.auth.signInWithPassword({ email: loginEmail, password: pwd })
-        .catch(err => console.warn('Background refresh failed (offline?):', err));
+      // AWAIT the Supabase session so that App.jsx's loadNotes doesn't fail with a null user
+      const { data, error } = await supabase.auth.signInWithPassword({ email: loginEmail, password: pwd });
+      
+      if (error) {
+        // Allow offline fallback if network fails
+        const isOffline = !navigator.onLine || error.message?.includes('fetch') || error.status === 0;
+        if (!isOffline) {
+          throw error; // If it's a real credential error, throw it to show error UI
+        }
+        console.warn('Background refresh failed (offline). Proceeding with local session.');
+      }
 
+      const vaultKey = deriveKey(pwd);
       setStatus('success');
 
       setTimeout(() => {
         onSuccess({
-          user: { email: loginEmail },
+          user: data?.user || { email: loginEmail },
           vaultKey,
           isDecoy: false,
         });
