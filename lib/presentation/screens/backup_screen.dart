@@ -4,6 +4,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../auth/auth_provider.dart';
 import '../providers/diary_provider.dart';
 import '../../core/constants/app_theme.dart';
@@ -35,7 +36,10 @@ class _BackupScreenState extends State<BackupScreen> {
     // Shared Preferences hook to store/load last backup date
     // (mocking or checking the backup file timestamps)
     final directory = await getApplicationDocumentsDirectory();
-    final backupFile = File(p.join(directory.path, 'ynote_backup_encrypted.db'));
+    var backupFile = File(p.join(directory.path, 'diaro_backup_encrypted.db'));
+    if (!await backupFile.exists()) {
+      backupFile = File(p.join(directory.path, 'ynote_backup_encrypted.db'));
+    }
     if (await backupFile.exists()) {
       final modified = await backupFile.lastModified();
       setState(() {
@@ -57,13 +61,17 @@ class _BackupScreenState extends State<BackupScreen> {
       
       // Determine active db name
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final activeDbName = authProvider.isDecoyMode ? 'ynote_decoy.db' : 'ynote_secure.db';
+      final activeDbName = authProvider.isDecoyMode 
+          ? 'diaro_decoy.db' 
+          : (Supabase.instance.client.auth.currentSession?.user.id != null 
+              ? 'diaro_${Supabase.instance.client.auth.currentSession!.user.id}.db' 
+              : 'diaro_secure.db');
       
       final dbFile = File(p.join(appDir.path, activeDbName));
 
       if (await dbFile.exists()) {
         // Copy to standard backup destination file
-        final backupFile = File(p.join(appDir.path, 'ynote_backup_encrypted.db'));
+        final backupFile = File(p.join(appDir.path, 'diaro_backup_encrypted.db'));
         await dbFile.copy(backupFile.path);
 
         setState(() {
@@ -93,7 +101,10 @@ class _BackupScreenState extends State<BackupScreen> {
   // Local Restore from backup file
   Future<void> _performLocalRestore() async {
     final appDir = await getApplicationDocumentsDirectory();
-    final backupFile = File(p.join(appDir.path, 'ynote_backup_encrypted.db'));
+    var backupFile = File(p.join(appDir.path, 'diaro_backup_encrypted.db'));
+    if (!await backupFile.exists()) {
+      backupFile = File(p.join(appDir.path, 'ynote_backup_encrypted.db'));
+    }
 
     if (!await backupFile.exists()) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -133,7 +144,11 @@ class _BackupScreenState extends State<BackupScreen> {
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final activeDbName = authProvider.isDecoyMode ? 'ynote_decoy.db' : 'ynote_secure.db';
+      final activeDbName = authProvider.isDecoyMode 
+          ? 'diaro_decoy.db' 
+          : (Supabase.instance.client.auth.currentSession?.user.id != null 
+              ? 'diaro_${Supabase.instance.client.auth.currentSession!.user.id}.db' 
+              : 'diaro_secure.db');
       final activeDbPath = p.join(appDir.path, activeDbName);
 
       // Close the active database connection
