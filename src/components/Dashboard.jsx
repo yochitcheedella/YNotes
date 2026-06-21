@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 export default function Dashboard({ notes, onNavigate, onSelectNote, onNewNote }) {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  // Generate calendar days for October 2024 (matching mockups defaults)
-  const currentYear = 2024;
-  const currentMonth = 9; // October (0-indexed)
+  const [calendarDate, setCalendarDate] = useState(new Date());
+
+  const currentYear = calendarDate.getFullYear();
+  const currentMonth = calendarDate.getMonth(); 
   
   const getDaysInMonth = (year, month) => {
     return new Date(year, month + 1, 0).getDate();
@@ -19,8 +20,8 @@ export default function Dashboard({ notes, onNavigate, onSelectNote, onNewNote }
   const firstDayIndex = getFirstDayOfMonth(currentYear, currentMonth);
 
   const daysArray = [];
-  // Fill previous month padding
-  for (let i = 29; i < 29 + firstDayIndex; i++) {
+  const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
+  for (let i = prevMonthDays - firstDayIndex + 1; i <= prevMonthDays; i++) {
     daysArray.push({ dayNum: i, currentMonth: false });
   }
   // Fill October days
@@ -66,12 +67,20 @@ export default function Dashboard({ notes, onNavigate, onSelectNote, onNewNote }
       <section className="mb-8">
         <div className="glass-card rounded-xl p-6 shadow-lg">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-white">October 2024</h2>
+            <h2 className="text-xl font-semibold text-white">
+              {calendarDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+            </h2>
             <div className="flex gap-2">
-              <button className="p-2 rounded-full hover:bg-white/10 transition-colors">
+              <button 
+                onClick={() => setCalendarDate(new Date(currentYear, currentMonth - 1, 1))}
+                className="p-2 rounded-full hover:bg-white/10 transition-colors"
+              >
                 <span className="material-symbols-outlined text-white">chevron_left</span>
               </button>
-              <button className="p-2 rounded-full hover:bg-white/10 transition-colors">
+              <button 
+                onClick={() => setCalendarDate(new Date(currentYear, currentMonth + 1, 1))}
+                className="p-2 rounded-full hover:bg-white/10 transition-colors"
+              >
                 <span className="material-symbols-outlined text-white">chevron_right</span>
               </button>
             </div>
@@ -81,7 +90,10 @@ export default function Dashboard({ notes, onNavigate, onSelectNote, onNewNote }
           </div>
           <div className="grid grid-cols-7 gap-y-2 text-sm">
             {daysArray.map((item, index) => {
-              const isSelected = item.currentMonth && selectedDate.getDate() === item.dayNum;
+              const isSelected = item.currentMonth && 
+                                 selectedDate.getDate() === item.dayNum &&
+                                 selectedDate.getMonth() === currentMonth &&
+                                 selectedDate.getFullYear() === currentYear;
               const hasNote = item.currentMonth && hasNoteOnDay(item.dayNum);
               
               return (
