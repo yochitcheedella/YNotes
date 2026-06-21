@@ -36,7 +36,7 @@ class DBHelper {
     throw StateError('Database not initialized. Call initDatabase() after login.');
   }
 
-  Future<void> initDatabase({required bool isDecoy, required String password}) async {
+  Future<void> initDatabase({required bool isDecoy, required String password, String? userId}) async {
     if (_database != null) {
       await _database!.close();
       _database = null;
@@ -45,11 +45,26 @@ class DBHelper {
     _masterPassword = password;
 
     final dbDirectory = await getApplicationDocumentsDirectory();
-    final dbName = isDecoy ? 'ynote_decoy.db' : 'ynote_secure.db';
-    final path = join(dbDirectory.path, dbName);
+    
+    // Migration and isolation logic
+    final oldPath = join(dbDirectory.path, isDecoy ? 'ynote_decoy.db' : 'ynote_secure.db');
+    final dbName = isDecoy ? 'diaro_decoy.db' : (userId != null ? 'diaro_$userId.db' : 'diaro_secure.db');
+    final newPath = join(dbDirectory.path, dbName);
+
+    // If an old global database exists, but the user-specific database does not, migrate it
+    final oldFile = File(oldPath);
+    final newFile = File(newPath);
+    if (await oldFile.exists() && !(await newFile.exists())) {
+      try {
+        await oldFile.rename(newPath);
+        AppLogger.info('Migrated old database to user-isolated path: $newPath');
+      } catch (e) {
+        AppLogger.error('Failed to migrate old database', exception: e);
+      }
+    }
 
     _database = await openDatabase(
-      path,
+      newPath,
       version: _dbVersion,
       onCreate: (db, version) async {
         await _createTables(db);

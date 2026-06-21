@@ -45,7 +45,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       if (!mounted) return;
 
       if (authProvider.isAuthenticated) {
-        Navigator.of(context).pushReplacementNamed('/dashboard');
+        if (!authProvider.hasPin) {
+          Navigator.of(context).pushReplacementNamed('/pin-setup');
+        } else if (authProvider.isLocked) {
+          Navigator.of(context).pushReplacementNamed('/pin-login');
+        } else {
+          Navigator.of(context).pushReplacementNamed('/dashboard');
+        }
       } else {
         Navigator.of(context).pushReplacementNamed('/login');
       }

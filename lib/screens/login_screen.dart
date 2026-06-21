@@ -34,7 +34,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final success = await authProvider.login(email, password);
     if (success && mounted) {
-      Navigator.of(context).pushReplacementNamed('/dashboard');
+      if (!authProvider.hasPin) {
+        Navigator.of(context).pushReplacementNamed('/pin-setup');
+      } else {
+        Navigator.of(context).pushReplacementNamed('/dashboard');
+      }
     }
   }
 

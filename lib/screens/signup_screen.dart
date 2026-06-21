@@ -38,8 +38,11 @@ class _SignupScreenState extends State<SignupScreen> {
 
     final success = await authProvider.signup(email, password, name);
     if (success && mounted) {
-      // Pop to login, or push dashboard directly
-      Navigator.of(context).pushNamedAndRemoveUntil('/dashboard', (route) => false);
+      if (!authProvider.hasPin) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/pin-setup', (route) => false);
+      } else {
+        Navigator.of(context).pushNamedAndRemoveUntil('/dashboard', (route) => false);
+      }
     }
   }
 

@@ -10,6 +10,8 @@ import 'screens/splash_screen.dart';
 import 'presentation/screens/onboarding_screen.dart';
 import 'screens/login_screen.dart';
 import 'presentation/screens/dashboard_screen.dart';
+import 'presentation/screens/pin_setup_screen.dart';
+import 'presentation/screens/pin_login_screen.dart';
 
 import 'core/utils/app_logger.dart';
 
@@ -62,7 +64,7 @@ class _DiaroAppState extends State<DiaroApp> {
       final session = data.session;
 
       if (session != null) {
-        AppLogger.info("Supabase session restored: \${session.user.id}");
+        AppLogger.info("Supabase session restored: ${session.user.id}");
       }
     });
   }
@@ -90,6 +92,8 @@ class _DiaroAppState extends State<DiaroApp> {
         '/onboarding': (context) => const OnboardingScreen(),
         '/login': (context) => const LoginScreen(),
         '/dashboard': (context) => const DashboardScreen(),
+        '/pin-setup': (context) => const PinSetupScreen(),
+        '/pin-login': (context) => const PinLoginScreen(),
       },
     );
   }
@@ -111,6 +115,18 @@ class _AppInteractionAndLifecycleWrapperState extends State<AppInteractionAndLif
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    // Initialize AutoLockService
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    AutoLockService.instance.initialize(
+      initialDuration: authProvider.autoLockDuration,
+      onLockTriggered: () {
+        if (authProvider.isAuthenticated && authProvider.hasPin) {
+          authProvider.lock();
+          _checkLockRedirection();
+        }
+      },
+    );
   }
 
   @override
@@ -125,7 +141,7 @@ class _AppInteractionAndLifecycleWrapperState extends State<AppInteractionAndLif
     super.didChangeAppLifecycleState(state);
     
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    if (!authProvider.isAuthenticated) return;
+    if (!authProvider.isAuthenticated || !authProvider.hasPin) return;
 
     if (state == AppLifecycleState.paused) {
       AutoLockService.instance.pause();
@@ -137,9 +153,10 @@ class _AppInteractionAndLifecycleWrapperState extends State<AppInteractionAndLif
 
   void _checkLockRedirection() {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    // If the timer locked the session, pop all routes and redirect to the login screen
     if (!authProvider.isAuthenticated) {
       Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    } else if (authProvider.isLocked) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/pin-login', (route) => false);
     }
   }
 
@@ -152,7 +169,7 @@ class _AppInteractionAndLifecycleWrapperState extends State<AppInteractionAndLif
       onPointerDown: (event) {
         // Record user touch interaction globally
         // Resets the inactivity timer whenever the user touches anywhere in the viewport
-        if (authProvider.isAuthenticated) {
+        if (authProvider.isAuthenticated && authProvider.hasPin) {
           AutoLockService.instance.recordInteraction();
         }
       },
