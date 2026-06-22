@@ -47,3 +47,9 @@ android/app/*.jks
 android/app/build/
 android/.gradle/
 android/capacitor-cordova-android-plugins/build/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
