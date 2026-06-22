@@ -1,7 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
+import { Preferences } from '@capacitor/preferences';
+import { hashPassword, encryptText } from '../cryptoHelper';
 
-export default function Settings({ onLogout }) {
+export default function Settings({ vaultKey, onLogout, onShowLegal }) {
+  const [pinEnabled, setPinEnabled] = useState(false);
+  const [showPinModal, setShowPinModal] = useState(false);
+  const [pinInput, setPinInput] = useState('');
+  const [pinConfirm, setPinConfirm] = useState('');
+  const [pinStep, setPinStep] = useState('enter'); // 'enter' | 'confirm' | 'remove'
+
+  useEffect(() => {
+    const checkPin = async () => {
+      const { value } = await Preferences.get({ key: 'diaro_pin_hash' });
+      if (value) setPinEnabled(true);
+    };
+    checkPin();
+  }, []);
+
   const [autoLockSeconds, setAutoLockSeconds] = useState(60);
   const [biometricEnabled, setBiometricEnabled] = useState(true);
   const [decoyEnabled, setDecoyEnabled] = useState(false);
@@ -48,6 +64,59 @@ export default function Settings({ onLogout }) {
     onLogout();
   };
 
+  const togglePinLock = async (enable) => {
+    if (enable) {
+      setPinStep('enter');
+      setPinInput('');
+      setPinConfirm('');
+      setShowPinModal(true);
+    } else {
+      setPinStep('remove');
+      setPinInput('');
+      setShowPinModal(true);
+    }
+  };
+
+  const handlePinSubmit = async (e) => {
+    e.preventDefault();
+    if (pinStep === 'enter') {
+      if (pinInput.length !== 4) return alert('PIN must be 4 digits.');
+      setPinStep('confirm');
+    } else if (pinStep === 'confirm') {
+      if (pinInput !== pinConfirm) {
+        alert('PINs do not match. Try again.');
+        setPinStep('enter');
+        setPinInput('');
+        setPinConfirm('');
+        return;
+      }
+      // Store hashed PIN
+      const hashed = hashPassword(pinInput);
+      await Preferences.set({ key: 'diaro_pin_hash', value: hashed });
+      
+      // Encrypt vault key and store it
+      const encryptedKey = encryptText(vaultKey, pinInput);
+      await Preferences.set({ key: 'diaro_encrypted_vault_key', value: encryptedKey });
+      
+      setPinEnabled(true);
+      setShowPinModal(false);
+      alert('PIN Lock enabled successfully.');
+    } else if (pinStep === 'remove') {
+      const { value: storedHash } = await Preferences.get({ key: 'diaro_pin_hash' });
+      if (hashPassword(pinInput) !== storedHash) {
+        alert('Incorrect PIN. Cannot disable.');
+        setPinInput('');
+        return;
+      }
+      // Correct PIN entered, remove from storage
+      await Preferences.remove({ key: 'diaro_pin_hash' });
+      await Preferences.remove({ key: 'diaro_encrypted_vault_key' });
+      setPinEnabled(false);
+      setShowPinModal(false);
+      alert('PIN Lock disabled.');
+    }
+  };
+
   return (
     <main className="relative z-10 pt-20 px-4 max-w-2xl mx-auto pb-24 space-y-6">
       
@@ -59,7 +128,15 @@ export default function Settings({ onLogout }) {
 
       {/* Security settings */}
       <section className="glass-card rounded-2xl p-6 space-y-4 shadow-xl">
-        <h3 className="text-xs font-mono text-diaroAccent-300 uppercase tracking-widest block">Security Settings</h3>
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-xs font-mono text-diaroAccent-300 uppercase tracking-widest block">Security Settings</h3>
+          <button 
+            onClick={onShowLegal}
+            className="text-[10px] font-mono text-diaroAccent-400 hover:text-white uppercase tracking-widest transition-colors"
+          >
+            Privacy & Legal
+          </button>
+        </div>
         
         {/* Change Password List Item */}
         <div className="flex items-center justify-between py-2 border-b border-slate-800/60">
@@ -73,6 +150,23 @@ export default function Settings({ onLogout }) {
           >
             Modify
           </button>
+        </div>
+
+        {/* PIN Lock Switch */}
+        <div className="flex items-center justify-between py-2 border-b border-slate-800/60">
+          <div>
+            <p className="text-sm font-semibold text-white">PIN Code Lock</p>
+            <p className="text-xs text-diaroAccent-300/40 mt-0.5">Secure vault with a 4-digit PIN.</p>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input 
+              type="checkbox" 
+              className="sr-only peer"
+              checked={pinEnabled}
+              onChange={(e) => togglePinLock(e.target.checked)}
+            />
+            <div className="w-11 h-6 bg-slate-800 rounded-full peer peer-focus:ring-0 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-slate-400 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-diaroAccent-600 peer-checked:after:bg-white"></div>
+          </label>
         </div>
 
         {/* Biometrics Switch */}
@@ -210,6 +304,53 @@ export default function Settings({ onLogout }) {
                 className="px-4 py-2 rounded-lg bg-diaroAccent-600 hover:bg-diaroAccent-500 text-xs font-mono uppercase tracking-wider text-white"
               >
                 Save
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* PIN Modal */}
+      {showPinModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+          <form 
+            onSubmit={handlePinSubmit}
+            className="glass-card rounded-2xl p-6 w-full max-w-sm space-y-4 relative"
+          >
+            <h3 className="text-md font-semibold text-white">
+              {pinStep === 'enter' ? 'Set 4-Digit PIN' : pinStep === 'confirm' ? 'Confirm PIN' : 'Enter Current PIN'}
+            </h3>
+            <div className="space-y-1">
+              <label className="block text-xs font-mono text-diaroAccent-300 uppercase tracking-widest">
+                {pinStep === 'remove' ? 'Current PIN' : 'PIN'}
+              </label>
+              <input 
+                type="password"
+                maxLength={4}
+                className="w-full px-4 py-2.5 rounded-xl text-white font-mono text-center tracking-[0.5em] cyber-input outline-none focus:ring-0 text-2xl" 
+                placeholder="••••"
+                value={pinStep === 'confirm' ? pinConfirm : pinInput}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  if (pinStep === 'confirm') setPinConfirm(val);
+                  else setPinInput(val);
+                }}
+                required
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <button 
+                type="button" 
+                onClick={() => setShowPinModal(false)}
+                className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono uppercase tracking-wider text-diaroAccent-200"
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit"
+                className="px-4 py-2 rounded-lg bg-diaroAccent-600 hover:bg-diaroAccent-500 text-xs font-mono uppercase tracking-wider text-white"
+              >
+                {pinStep === 'remove' ? 'Disable' : 'Next'}
               </button>
             </div>
           </form>

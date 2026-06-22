@@ -5,7 +5,7 @@ import { useBiometric } from '../hooks/useBiometric';
 import { Capacitor } from '@capacitor/core';
 import { Preferences } from '@capacitor/preferences';
 
-export default function Login({ onAuthSuccess, initialMessage, clearInitialMessage }) {
+export default function Login({ onAuthSuccess, initialMessage, clearInitialMessage, onShowLegal }) {
   // Modes: 'login' or 'register'
   const [authMode, setAuthMode] = useState('login');
   const { isSupported, isEnrolled, saveCredentials, deleteCredentials, authenticate } = useBiometric();
@@ -267,7 +267,14 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
           );
           return;
         }
-        showCustomAlert('Registration Failed', error.message);
+        let errorMessage = error.message || 'An unknown error occurred.';
+        if (typeof errorMessage === 'object') {
+          errorMessage = JSON.stringify(errorMessage);
+        }
+        if (errorMessage === '{}' || !errorMessage.trim()) {
+          errorMessage = error.error_description || 'Registration failed. The server did not return a specific error reason. Please check if registrations are enabled on your Supabase project.';
+        }
+        showCustomAlert('Registration Failed', errorMessage);
         setIsLoading(false);
         return;
       }
@@ -716,9 +723,18 @@ export default function Login({ onAuthSuccess, initialMessage, clearInitialMessa
         </div>
 
         {/* Security and Encryption Trust Footer */}
-        <footer className="mt-8 flex items-center justify-center gap-2 text-diaroAccent-200/30 select-none">
-          <span className="material-symbols-outlined text-[14px]">encrypted</span>
-          <span className="font-mono text-[10px] uppercase tracking-widest">End-to-End Local AES-256 Architecture</span>
+        <footer className="mt-8 flex flex-col items-center justify-center gap-2 text-diaroAccent-200/30">
+          <div className="flex items-center gap-2 select-none">
+            <span className="material-symbols-outlined text-[14px]">encrypted</span>
+            <span className="font-mono text-[10px] uppercase tracking-widest">End-to-End Local AES-256 Architecture</span>
+          </div>
+          <button 
+            type="button" 
+            onClick={onShowLegal} 
+            className="text-[10px] font-mono uppercase tracking-widest hover:text-white transition-colors"
+          >
+            Privacy Policy & Terms
+          </button>
         </footer>
       </main>
 

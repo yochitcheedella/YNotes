@@ -1,8 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 import { Preferences } from '@capacitor/preferences'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key'
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('FATAL: Supabase URL and Anon Key must be defined in environment variables.');
+}
 
 // Custom storage provider using Capacitor Preferences for cross-platform reliability
 const capacitorStorage = {

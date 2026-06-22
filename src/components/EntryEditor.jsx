@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { encryptText } from '../cryptoHelper';
+import { Preferences } from '@capacitor/preferences';
 
 const MOODS = [
   { val: 'happy', label: '😊 Happy' },
@@ -220,6 +221,8 @@ export default function EntryEditor({ activeNote, vaultKey, onSaveComplete, onCa
       const { data: { user } } = await supabase.auth.getUser();
       const userId = user ? user.id : null;
 
+      let isOfflineSaved = false;
+
       if (activeNote && activeNote.id) {
         // Update existing note
         const { error } = await supabase
@@ -233,15 +236,20 @@ export default function EntryEditor({ activeNote, vaultKey, onSaveComplete, onCa
           })
           .eq('id', activeNote.id);
 
-        if (error) {
-          // If Supabase table isn't set up yet, fallback to saving state in Memory
-          console.warn('Supabase update error (falling back to memory):', error.message);
+        if (error || !navigator.onLine) {
+          console.warn('Network error (queueing offline update):', error?.message);
+          isOfflineSaved = true;
+          await queueOfflineAction(userId, { type: 'UPDATE', id: activeNote.id, payload: {
+            title_encrypted: encryptedTitle,
+            content_encrypted: encryptedContent,
+            mood: mood,
+            expires_at: expiresInDays ? new Date(Date.now() + parseInt(expiresInDays, 10) * 86400000).toISOString() : null,
+            max_views: maxViews ? parseInt(maxViews, 10) : null,
+          }});
         }
       } else {
         // Insert new note
-        const { error } = await supabase
-          .from('notes')
-          .insert({
+        const insertPayload = {
             title_encrypted: encryptedTitle,
             content_encrypted: encryptedContent,
             mood: mood,
@@ -249,11 +257,20 @@ export default function EntryEditor({ activeNote, vaultKey, onSaveComplete, onCa
             created_at: new Date().toISOString(),
             expires_at: expiresInDays ? new Date(Date.now() + parseInt(expiresInDays, 10) * 86400000).toISOString() : null,
             max_views: maxViews ? parseInt(maxViews, 10) : null,
-          });
+        };
+        const { error } = await supabase
+          .from('notes')
+          .insert(insertPayload);
 
-        if (error) {
-          console.warn('Supabase insert error (falling back to memory):', error.message);
+        if (error || !navigator.onLine) {
+          console.warn('Network error (queueing offline insert):', error?.message);
+          isOfflineSaved = true;
+          await queueOfflineAction(userId, { type: 'INSERT', payload: insertPayload });
         }
+      }
+
+      if (isOfflineSaved) {
+        alert('You are offline. Note saved locally and will sync when connection is restored.');
       }
 
       // Notify parent app of success, passing plaintext version to instantly show in state
@@ -270,6 +287,17 @@ export default function EntryEditor({ activeNote, vaultKey, onSaveComplete, onCa
       alert('Vault synchronization encryption failed.');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const queueOfflineAction = async (userId, action) => {
+    try {
+      const { value } = await Preferences.get({ key: `diaro_sync_queue_${userId}` });
+      const queue = value ? JSON.parse(value) : [];
+      queue.push(action);
+      await Preferences.set({ key: `diaro_sync_queue_${userId}`, value: JSON.stringify(queue) });
+    } catch (e) {
+      console.error('Failed to queue offline action:', e);
     }
   };
 

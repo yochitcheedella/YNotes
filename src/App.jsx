@@ -12,12 +12,16 @@ import Analytics from './components/Analytics';
 import MediaVault from './components/MediaVault';
 import Settings from './components/Settings';
 import AuditLogs from './components/AuditLogs';
+import Legal from './components/Legal';
+import PinLock from './components/PinLock';
 
 export default function App() {
   const [session, setSession] = useState(null); // { user, vaultKey, isDecoy }
   const [activeScreen, setActiveScreen] = useState('login');
   const [notes, setNotes] = useState([]);
   const [activeNote, setActiveNote] = useState(null);
+  const [pathname, setPathname] = useState(window.location.pathname);
+  const [pinLocked, setPinLocked] = useState(false);
 
   // Biometric gate: holds cached email+password while lock screen is shown
   // null = no cached creds (show login), object = show fingerprint lock screen
@@ -36,6 +40,12 @@ export default function App() {
   useEffect(() => {
     const checkCachedCredentials = async () => {
       try {
+        const { value: pinHash } = await Preferences.get({ key: 'diaro_pin_hash' });
+        if (pinHash) {
+          setPinLocked(true);
+          return; // Skip biometric check if PIN is enabled
+        }
+
         const { value: email } = await Preferences.get({ key: 'diaro_remembered_email' });
         const { value: password } = await Preferences.get({ key: 'diaro_cached_password' });
         
@@ -50,6 +60,28 @@ export default function App() {
     };
     checkCachedCredentials();
   }, []);
+
+  // Listen for browser navigation / history events
+  useEffect(() => {
+    const handlePopState = () => {
+      setPathname(window.location.pathname);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Lock app when sent to background
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && session) {
+        Preferences.get({ key: 'diaro_pin_hash' }).then(({ value }) => {
+          if (value) setPinLocked(true);
+        });
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [session]);
 
   // Called by BiometricLock after successful fingerprint authentication
   const handleBiometricSuccess = (sessionInfo) => {
@@ -88,16 +120,19 @@ export default function App() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      if (navigator.onLine) {
+        await syncOfflineQueue(user.id);
+      }
+
       const { data, error } = await supabase
         .from('notes')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.warn('Supabase fetch notes error (using mock fallback):', error.message);
-        // Fallback to local storage or starting mock notes
-        loadMockNotes(vaultKey);
+      if (error || !navigator.onLine) {
+        console.warn('Network error or offline (loading from offline cache):', error?.message);
+        await loadOfflineNotes(vaultKey, user.id);
         return;
       }
 
@@ -109,13 +144,20 @@ export default function App() {
           content: decryptText(n.content_encrypted, vaultKey)
         }));
         setNotes(decryptedList);
+        // Cache encrypted data for offline use
+        await Preferences.set({ key: `diaro_offline_notes_${user.id}`, value: JSON.stringify(data) });
       } else {
         // Table is empty, seed starting notes for demo
         seedNotes(vaultKey, user.id);
       }
     } catch (err) {
       console.error('Error fetching diaries', err);
-      loadMockNotes(vaultKey);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) await loadOfflineNotes(vaultKey, user.id);
+      } catch (e) {
+        // user not available
+      }
     }
   };
 
@@ -165,25 +207,52 @@ export default function App() {
     }
   };
 
-  const loadMockNotes = (vaultKey) => {
-    // Return standard mock notes for testing
-    const seed = [
-      {
-        id: 1,
-        title: 'Morning Reflection',
-        content: 'Woke up feeling incredibly centered. The fog over the valley was thick this morning, reminding me that clarity often comes after a period of stillness...',
-        mood: 'happy',
-        created_at: new Date(2024, 9, 11, 8, 45).toISOString()
-      },
-      {
-        id: 2,
-        title: 'The Creative Spark',
-        content: 'Finally cracked the project structure. It feels like a massive weight has been lifted. [Attached Blueprint Photo]',
-        mood: 'excited',
-        created_at: new Date(2024, 9, 11, 14, 15).toISOString()
+  const loadOfflineNotes = async (vaultKey, userId) => {
+    try {
+      const { value } = await Preferences.get({ key: `diaro_offline_notes_${userId}` });
+      if (value) {
+        const data = JSON.parse(value);
+        const decryptedList = data.map(n => ({
+          ...n,
+          title: decryptText(n.title_encrypted, vaultKey),
+          content: decryptText(n.content_encrypted, vaultKey)
+        }));
+        setNotes(decryptedList);
+      } else {
+        setNotes([]);
       }
-    ];
-    setNotes(seed);
+    } catch (err) {
+      console.error('Error loading offline notes:', err);
+      setNotes([]);
+    }
+  };
+
+  const syncOfflineQueue = async (userId) => {
+    try {
+      const { value } = await Preferences.get({ key: `diaro_sync_queue_${userId}` });
+      if (!value) return;
+      const queue = JSON.parse(value);
+      if (queue.length === 0) return;
+
+      const remainingQueue = [];
+      for (const action of queue) {
+        try {
+          if (action.type === 'INSERT') {
+            const { error } = await supabase.from('notes').insert(action.payload);
+            if (error) throw error;
+          } else if (action.type === 'UPDATE') {
+            const { error } = await supabase.from('notes').update(action.payload).eq('id', action.id);
+            if (error) throw error;
+          }
+        } catch (e) {
+          console.error('Failed to sync action:', action, e);
+          remainingQueue.push(action);
+        }
+      }
+      await Preferences.set({ key: `diaro_sync_queue_${userId}`, value: JSON.stringify(remainingQueue) });
+    } catch (err) {
+      console.error('Error processing sync queue:', err);
+    }
   };
 
   // Auth Success hook
@@ -195,12 +264,29 @@ export default function App() {
     lastActivityRef.current = Date.now();
   };
 
+  const handlePinUnlock = async (vaultKey) => {
+    const { data } = await supabase.auth.getUser();
+    if (data?.user) {
+      setSession({ user: data.user, vaultKey, isDecoy: false });
+      setPinLocked(false);
+      setActiveScreen('dashboard');
+      loadNotes(vaultKey);
+      lastActivityRef.current = Date.now();
+    } else {
+      // Session invalid, force login
+      handleLogout();
+    }
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     await Preferences.remove({ key: 'diaro_remembered_email' });
     await Preferences.remove({ key: 'diaro_cached_password' });
+    await Preferences.remove({ key: 'diaro_pin_hash' });
+    await Preferences.remove({ key: 'diaro_encrypted_vault_key' });
     setSession(null);
     setBiometricPending(null);
+    setPinLocked(false);
     setNotes([]);
     setActiveNote(null);
     setActiveScreen('login');
@@ -252,7 +338,46 @@ export default function App() {
     setActiveScreen('dashboard');
   };
 
-  // 1. Show fingerprint lock screen if cached credentials exist
+  // 1. Check path-based routes first (publicly accessible legal pages)
+  if (pathname === '/privacy-policy') {
+    return (
+      <div className="min-h-screen flex flex-col justify-between relative bg-bgDark">
+        <Legal 
+          onCancel={() => {
+            window.history.pushState({}, '', '/');
+            setPathname('/');
+          }} 
+          initialTab="privacy" 
+        />
+      </div>
+    );
+  }
+
+  if (pathname === '/terms-of-service') {
+    return (
+      <div className="min-h-screen flex flex-col justify-between relative bg-bgDark">
+        <Legal 
+          onCancel={() => {
+            window.history.pushState({}, '', '/');
+            setPathname('/');
+          }} 
+          initialTab="tos" 
+        />
+      </div>
+    );
+  }
+
+  // 2. PIN Lock takes precedence if enabled
+  if (pinLocked) {
+    return (
+      <PinLock 
+        onUnlock={handlePinUnlock} 
+        onLogout={handleLogout} 
+      />
+    );
+  }
+
+  // 3. Show fingerprint lock screen if cached credentials exist
   if (biometricPending) {
     return (
       <BiometricLock
@@ -264,13 +389,17 @@ export default function App() {
     );
   }
 
-  // 2. No cached credentials → show standard login
+  // 3. No cached credentials → show standard login
   if (!session) {
     return (
       <Login 
         onAuthSuccess={handleAuthSuccess} 
         initialMessage={loginMessage} 
         clearInitialMessage={() => setLoginMessage('')} 
+        onShowLegal={() => {
+          window.history.pushState({}, '', '/privacy-policy');
+          setPathname('/privacy-policy');
+        }}
       />
     );
   }
@@ -348,7 +477,14 @@ export default function App() {
           <MediaVault />
         )}
         {activeScreen === 'settings' && (
-          <Settings onLogout={handleLogout} />
+          <Settings 
+            vaultKey={session.vaultKey}
+            onLogout={handleLogout} 
+            onShowLegal={() => {
+              window.history.pushState({}, '', '/privacy-policy');
+              setPathname('/privacy-policy');
+            }} 
+          />
         )}
         {activeScreen === 'audit_logs' && (
           <AuditLogs onCancel={() => setActiveScreen('dashboard')} />
